@@ -59,7 +59,10 @@ int countAntBR = 0;
 
 unsigned long t_start;
 
-String sw = "";
+String swBL = "";
+String swFL = "";
+String swFR = "";
+String swBR = "";
 
 double velBL = 0;
 double velFL = 0;
@@ -90,6 +93,15 @@ double last_errorBL = 0.0;
 double last_errorFL = 0.0;
 double last_errorFR = 0.0;
 double last_errorBR = 0.0;
+
+void checkBLA();
+void checkBLB();
+void checkFLA();
+void checkFLB();
+void checkFRA();
+void checkFRB();
+void checkBRA();
+void checkBRB();
 
 void setup() {
   Serial.begin(115200); // set up Serial library at 115200 bps
@@ -182,6 +194,7 @@ void loop() {
     if(swBL == "+"){
       digitalWrite(enBL1, LOW); // clockwise: comando al driver di andare avanti
       digitalWrite(enBL2, HIGH);
+    }
 		else if(swBL == "-"){
 			digitalWrite(enBL1, HIGH); // counterclockwise
       digitalWrite(enBL2, LOW);
@@ -214,10 +227,10 @@ void loop() {
       digitalWrite(enBR2, LOW);
 		}
 
-    speedBL_req = velBL;
-		speedBL_req = velFL;
-		speedBL_req = velFR;
-		speedBL_req = velBR;
+    speed_reqBL = velBL;
+		speed_reqFL = velFL;
+		speed_reqFR = velFR;
+		speed_reqBR = velBR;
   }
 
   if((millis()-lastMilli) >= LOOPTIME){ 
@@ -260,19 +273,19 @@ void printMotorInfo(int motor){  // display data
 				Serial.print("  PWM:");  
 			 	Serial.print(PWM_valBL);   
 				break;
-			case 1: 
+			case 2: 
 				Serial.print("< FL -> RPM:"); 
 				Serial.print(speed_actFL);
 				Serial.print("  PWM:");  
 			 	Serial.print(PWM_valFL);   
 				break;
-			case 1: 
+			case 3: 
 				Serial.print("< FR -> RPM:"); 
 				Serial.print(speed_actFR);
 				Serial.print("  PWM:");  
 			 	Serial.print(PWM_valFR);    
 				break;				
-			case 1: 
+			case 4: 
 				Serial.print("< BR -> RPM"); 
 				Serial.print(speed_actBR);
 				Serial.print("  PWM:");  
