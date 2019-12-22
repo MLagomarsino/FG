@@ -1,4 +1,3 @@
-
 // driver BL
 #define enBL1 22 // black
 #define enBL2 23 // white
@@ -39,33 +38,68 @@
 
 #define LOOPTIME 100  
 
-int stateA = 0;
-int stateB = 0;
-int counter = -1;
-unsigned long t_start;
-double vel = 0;
-String sw = "";
-double actvel = 0;
+int stateBLA = 0;
+int stateBLB = 0;
+int stateFLA = 0;
+int stateFLB = 0;
+int stateFRA = 0;
+int stateFRB = 0;
+int stateBRA = 0;
+int stateBRB = 0;
 
-int countAnt = 0;
-int PWM_val = 0; 
+int counterBL = 0;
+int counterFL = 0;
+int counterFR = 0;
+int counterBR = 0;
+
+int countAntBL = 0;
+int countAntFL = 0;
+int countAntFR = 0;
+int countAntBR = 0;
+
+unsigned long t_start;
+
+String sw = "";
+
+double velBL = 0;
+double velFL = 0;
+double velFR = 0;
+double velBR = 0;
+
+int PWM_valBL = 0;
+int PWM_valFL = 0; 
+int PWM_valFR = 0; 
+int PWM_valBR = 0; 
+ 
 unsigned long lastMilli = 0; // loop timing 
 unsigned long lastMilliPrint = 0; // loop timing
-double speed_req = 0.0; // speed (Set Point)
-double speed_act = 0.0; // speed (actual value)
+
+double speed_reqBL = 0.0; // speed (Set Point)
+double speed_actBL = 0.0; // speed (actual value)
+double speed_reqFL = 0.0; 
+double speed_actFL = 0.0; 
+double speed_reqFR = 0.0; 
+double speed_actFR = 0.0; 
+double speed_reqBR = 0.0; 
+double speed_actBR = 0.0;
+
 double Kp = 16.0; // PID proportional control Gain
 double Kd = 4.0; // PID Derivitave control gain
-double last_error = 0.0;
 
+double last_errorBL = 0.0;
+double last_errorFL = 0.0;
+double last_errorFR = 0.0;
+double last_errorBR = 0.0;
 
 void setup() {
   Serial.begin(115200); // set up Serial library at 115200 bps
+
   // motor BL
   pinMode(motorPinBL, OUTPUT);
   pinMode(enBL1, OUTPUT); // quelli che vanno al driver
   pinMode(enBL2, OUTPUT);
-  pinMode (encoderBLA, INPUT); // quelli che vengono dal motore
-  pinMode (encoderBLB, INPUT);
+  pinMode(encoderBLA, INPUT); // quelli che vengono dal motore
+  pinMode(encoderBLB, INPUT);
   attachInterrupt(digitalPinToInterrupt(encoderBLA), checkBLA, CHANGE);
   attachInterrupt(digitalPinToInterrupt(encoderBLB), checkBLB, CHANGE);
   digitalWrite(enBL1, LOW);
@@ -75,8 +109,8 @@ void setup() {
   pinMode(motorPinFL, OUTPUT);
   pinMode(enFL1, OUTPUT); // quelli che vanno al driver
   pinMode(enFL2, OUTPUT);
-  pinMode (encoderFLA, INPUT); // quelli che vengono dal motore
-  pinMode (encoderFLB, INPUT);
+  pinMode(encoderFLA, INPUT); // quelli che vengono dal motore
+  pinMode(encoderFLB, INPUT);
   attachInterrupt(digitalPinToInterrupt(encoderFLA), checkFLA, CHANGE);
   attachInterrupt(digitalPinToInterrupt(encoderFLB), checkFLB, CHANGE);
   digitalWrite(enFL1, LOW);
@@ -116,169 +150,260 @@ void setup() {
 
 void loop() {
   
-  String serialResponse ="";
+	String serialResponse ="";
 
-  if (Serial.available()) {
+  if(Serial.available()) {
     serialResponse  = Serial.readString();
-    vel = serialResponse.substring(2,5).toDouble();
-    sw = serialResponse.substring(1,2);
-    if(sw == "+"){
+		if(serialResponse.length() < 5){
+			swBL = serialResponse.substring(1,2);
+			swFL = swBL;
+			swFR = swFL;
+			swBR = swFR;
+
+			velBL = serialResponse.substring(2,5).toDouble();
+			velFL = velBL;
+			velFR = velFL;
+			velBR = velFR;
+		}
+		else{
+	 		swBL = serialResponse.substring(1,2);
+		  velBL = serialResponse.substring(2,5).toDouble();
+	
+			swFL = serialResponse.substring(6,7);
+			velFL = serialResponse.substring(7,10).toDouble();
+			 
+			swFR = serialResponse.substring(11,12);
+			velFR = serialResponse.substring(12,15).toDouble();
+
+			swBR = serialResponse.substring(16,17);
+			velBR = serialResponse.substring(17,20).toDouble();
+		}
+
+    if(swBL == "+"){
       digitalWrite(enBL1, LOW); // clockwise: comando al driver di andare avanti
       digitalWrite(enBL2, HIGH);
-
-      digitalWrite(enFL1, LOW);
-      digitalWrite(enFL2, HIGH);
-
-      
-      digitalWrite(enFR1, LOW);
-      digitalWrite(enFR2, HIGH);
-
-      
-      digitalWrite(enBR1, LOW);
-      digitalWrite(enBR2, HIGH);
-    }
-    else if (sw == "-"){
-      digitalWrite(enBL1, HIGH); // counterclockwise
+		else if(swBL == "-"){
+			digitalWrite(enBL1, HIGH); // counterclockwise
       digitalWrite(enBL2, LOW);
-
-      digitalWrite(enFL1, HIGH); 
-      digitalWrite(enFL2, LOW);
+		}
       
-      digitalWrite(enFR1, HIGH); 
-      digitalWrite(enFR2, LOW);
+		if(swFL == "+"){
+			digitalWrite(enFL1, LOW);
+      digitalWrite(enFL2, HIGH);
+		}
+		else if(swFL == "-"){
+			digitalWrite(enFL1, HIGH);
+      digitalWrite(enFL2, LOW);
+		}
 
-      digitalWrite(enBR1, HIGH); 
+		if(swFR == "+"){
+			digitalWrite(enFR1, LOW);
+      digitalWrite(enFR2, HIGH);
+		}
+		else if(swFR == "-"){
+			digitalWrite(enFR1, HIGH);
+      digitalWrite(enFR2, LOW);
+		}
+
+		if(swBR == "+"){
+			digitalWrite(enBR1, LOW);
+      digitalWrite(enBR2, HIGH);
+		}
+		else if(swBR == "-"){
+			digitalWrite(enBR1, HIGH);
       digitalWrite(enBR2, LOW);
-    }
-    speed_req = vel;
+		}
+
+    speedBL_req = velBL;
+		speedBL_req = velFL;
+		speedBL_req = velFR;
+		speedBL_req = velBR;
   }
+
   if((millis()-lastMilli) >= LOOPTIME){ 
-    lastMilli = millis();
-    speed_act = (double)(((double)(counter - countAnt)*(1000.0/(double)LOOPTIME))/(double)(320.0)); 
-    countAnt = counter;
-    PWM_val = updatePid(PWM_val, speed_req, speed_act); // compute PWM value
-    analogWrite(motorPinBL, PWM_val);  
-    analogWrite(motorPinFL, PWM_val);  
-    analogWrite(motorPinFR, PWM_val);  
-    analogWrite(motorPinBR, PWM_val);  
-   }
-   printMotorInfo();  
+		lastMilli = millis();
+
+    speed_actBL = (double)(((double)(counterBL - countAntBL)*(1000.0/(double)LOOPTIME))/(double)(320.0)); 
+		speed_actFL = (double)(((double)(counterBL - countAntFL)*(1000.0/(double)LOOPTIME))/(double)(320.0)); 
+		speed_actFR = (double)(((double)(counterBL - countAntFR)*(1000.0/(double)LOOPTIME))/(double)(320.0)); 
+		speed_actBR = (double)(((double)(counterBL - countAntBR)*(1000.0/(double)LOOPTIME))/(double)(320.0)); 
+
+    countAntBL = counterBL;
+		countAntFL = counterFL;
+		countAntFR = counterFR;
+		countAntBR = counterBR;
+
+    PWM_valBL = updatePid(1, PWM_valBL, speed_reqBL, speed_actBL); // compute PWM value
+		PWM_valFL = updatePid(2, PWM_valFL, speed_reqFL, speed_actFL); 
+		PWM_valFR = updatePid(3, PWM_valFR, speed_reqFR, speed_actFR); 
+		PWM_valBR = updatePid(4, PWM_valBR, speed_reqBR, speed_actBR); 
+
+    analogWrite(motorPinBL, PWM_valBL);  
+    analogWrite(motorPinFL, PWM_valFL);  
+    analogWrite(motorPinFR, PWM_valFR);  
+    analogWrite(motorPinBR, PWM_valBR);  
+	}
+  printMotorInfo(1);  
+	printMotorInfo(2);  
+	printMotorInfo(3);  
+	printMotorInfo(4);  
 }
 
-void printMotorInfo(){  // display data
- if((millis()-lastMilliPrint) >= 500){                     
-   lastMilliPrint = millis();
-   Serial.print("< RPM:");          
-   Serial.print(speed_act);         
-   Serial.print("  PWM:");  
-   Serial.print(PWM_val);   
-   Serial.print(" > \n");          
+void printMotorInfo(int motor){  // display data
+	if((millis()-lastMilliPrint) >= 500){                     
+  	lastMilliPrint = millis();
+  	
+		switch(motor){
+			case 1: 
+				Serial.print("< BL -> RPM:"); 
+				Serial.print(speed_actBL);
+				Serial.print("  PWM:");  
+			 	Serial.print(PWM_valBL);   
+				break;
+			case 1: 
+				Serial.print("< FL -> RPM:"); 
+				Serial.print(speed_actFL);
+				Serial.print("  PWM:");  
+			 	Serial.print(PWM_valFL);   
+				break;
+			case 1: 
+				Serial.print("< FR -> RPM:"); 
+				Serial.print(speed_actFR);
+				Serial.print("  PWM:");  
+			 	Serial.print(PWM_valFR);    
+				break;				
+			case 1: 
+				Serial.print("< BR -> RPM"); 
+				Serial.print(speed_actBR);
+				Serial.print("  PWM:");  
+			 	Serial.print(PWM_valBR);  
+				break;       
+			}         
+      Serial.print(" > \n"); 
  }
 }
 
-int updatePid(int command, double targetValue, double currentValue){ // compute PWM value
+int updatePid(int motor, int command, double targetValue, double currentValue){ // compute PWM value
   double pidTerm = 0.0; // PID correction
   double error = 0.0;                                                               
   error = (double) (fabs(targetValue) - fabs(currentValue)); 
-  pidTerm = (Kp * error) + (Kd * (error - last_error));                          
-  last_error = error;
+
+	switch(motor){
+		case 1: 
+			pidTerm = (Kp * error) + (Kd * (error - last_errorBL));  
+			last_errorBL = error;
+			break;
+		case 2:
+			pidTerm = (Kp * error) + (Kd * (error - last_errorFL));  
+			last_errorFL = error;
+			break;
+		case 3:
+			pidTerm = (Kp * error) + (Kd * (error - last_errorFR));  
+			last_errorFR = error;			
+			break;
+		case 4:
+			pidTerm = (Kp * error) + (Kd * (error - last_errorBR));  
+			last_errorBR = error;			
+			break;
+	}
+                          
   return constrain(command + int(pidTerm), 0, 255);
 }
 
 void checkBLA() {
-  stateA = digitalRead(encoderBLA);
-  stateB = digitalRead(encoderBLB);
+  stateBLA = digitalRead(encoderBLA);
+  stateBLB = digitalRead(encoderBLB);
   
-  if (stateA != stateB) {
-    counter++;
+  if (stateBLA != stateBLB) {
+    counterBL++;
   }
   else {
-    counter--;
+    counterBL--;
   }
 }
 
 void checkBLB(){
-  stateA = digitalRead(encoderBLA);
-  stateB = digitalRead(encoderBLB);
+  stateBLA = digitalRead(encoderBLA);
+  stateBLB = digitalRead(encoderBLB);
  
-  if (stateA == stateB) {
-    counter++;
+  if (stateBLA == stateBLB) {
+    counterBL++;
   }
   else {
-    counter--;
+    counterBL--;
   }
 }
 
 
 void checkFLA() {
-  stateA = digitalRead(encoderFLA);
-  stateB = digitalRead(encoderFLB);
+  stateFLA = digitalRead(encoderFLA);
+  stateFLB = digitalRead(encoderFLB);
   
-  if (stateA != stateB) {
-    counter++;
+  if (stateFLA != stateFLB) {
+    counterFL++;
   }
   else {
-    counter--;
+    counterFL--;
   }
 }
 
 void checkFLB(){
-  stateA = digitalRead(encoderFLA);
-  stateB = digitalRead(encoderFLB);
+  stateFLA = digitalRead(encoderFLA);
+  stateFLB = digitalRead(encoderFLB);
  
-  if (stateA == stateB) {
-    counter++;
+  if (stateFLA == stateFLB) {
+    counterFL++;
   }
   else {
-    counter--;
+    counterFL--;
   }
 }
 
 
 void checkFRA() {
-  stateA = digitalRead(encoderFRA);
-  stateB = digitalRead(encoderFRB);
+  stateFRA = digitalRead(encoderFRA);
+  stateFRB = digitalRead(encoderFRB);
   
-  if (stateA != stateB) {
-    counter++;
+  if (stateFRA != stateFRB) {
+    counterFR++;
   }
   else {
-    counter--;
+    counterFR--;
   }
 }
 
 void checkFRB(){
-  stateA = digitalRead(encoderFRA);
-  stateB = digitalRead(encoderFRB);
+  stateFRA = digitalRead(encoderFRA);
+  stateFRB = digitalRead(encoderFRB);
  
-  if (stateA == stateB) {
-    counter++;
+  if (stateFRA == stateFRB) {
+    counterFR++;
   }
   else {
-    counter--;
+    counterFR--;
   }
 }
 
 void checkBRA() {
-  stateA = digitalRead(encoderBRA);
-  stateB = digitalRead(encoderBRB);
+  stateBRA = digitalRead(encoderBRA);
+  stateBRB = digitalRead(encoderBRB);
   
-  if (stateA != stateB) {
-    counter++;
+  if (stateBRA != stateBRB) {
+    counterBR++;
   }
   else {
-    counter--;
+    counterBR--;
   }
 }
 
 void checkBRB(){
-  stateA = digitalRead(encoderBRA);
-  stateB = digitalRead(encoderBRB);
+  stateBRA = digitalRead(encoderBRA);
+  stateBRB = digitalRead(encoderBRB);
  
-  if (stateA == stateB) {
-    counter++;
+  if (stateBRA == stateBRB) {
+    counterBR++;
   }
   else {
-    counter--;
+    counterBR--;
   }
 }

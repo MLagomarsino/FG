@@ -96,7 +96,7 @@ while True:
     g = raw_input("Enter the velocity (rps) (between -2.0 and 2.0). Please enter the velocity in the format +(-)X.X (eg. +2.0 or -1.0 or +1.5). Or write stop to exit: ")
     sendToArduino(g)
     if g == "stop":
-        sendToArduino("+0.0")
+        sendToArduino("+0.0 +0.0 +0.0 +0.0")
         time.sleep(1)
         break
     for n in range(0, 1000000):
