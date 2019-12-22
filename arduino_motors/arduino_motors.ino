@@ -237,9 +237,9 @@ void loop() {
 		lastMilli = millis();
 
     speed_actBL = (double)(((double)(counterBL - countAntBL)*(1000.0/(double)LOOPTIME))/(double)(320.0)); 
-		speed_actFL = (double)(((double)(counterBL - countAntFL)*(1000.0/(double)LOOPTIME))/(double)(320.0)); 
-		speed_actFR = (double)(((double)(counterBL - countAntFR)*(1000.0/(double)LOOPTIME))/(double)(320.0)); 
-		speed_actBR = (double)(((double)(counterBL - countAntBR)*(1000.0/(double)LOOPTIME))/(double)(320.0)); 
+		speed_actFL = (double)(((double)(counterFL - countAntFL)*(1000.0/(double)LOOPTIME))/(double)(320.0)); 
+		speed_actFR = (double)(((double)(counterFR - countAntFR)*(1000.0/(double)LOOPTIME))/(double)(320.0)); 
+		speed_actBR = (double)(((double)(counterBR - countAntBR)*(1000.0/(double)LOOPTIME))/(double)(320.0)); 
 
     countAntBL = counterBL;
 		countAntFL = counterFL;
@@ -268,25 +268,25 @@ void printMotorInfo(int motor){  // display data
   	
 		switch(motor){
 			case 1: 
-				Serial.print("< BL -> RPM:"); 
+				Serial.print("< BL RPM:"); 
 				Serial.print(speed_actBL);
 				Serial.print("  PWM:");  
 			 	Serial.print(PWM_valBL);   
 				break;
 			case 2: 
-				Serial.print("< FL -> RPM:"); 
+				Serial.print("< FL RPM:"); 
 				Serial.print(speed_actFL);
 				Serial.print("  PWM:");  
 			 	Serial.print(PWM_valFL);   
 				break;
 			case 3: 
-				Serial.print("< FR -> RPM:"); 
+				Serial.print("< FR RPM:"); 
 				Serial.print(speed_actFR);
 				Serial.print("  PWM:");  
 			 	Serial.print(PWM_valFR);    
 				break;				
 			case 4: 
-				Serial.print("< BR -> RPM"); 
+				Serial.print("< BR RPM"); 
 				Serial.print(speed_actBR);
 				Serial.print("  PWM:");  
 			 	Serial.print(PWM_valBR);  
