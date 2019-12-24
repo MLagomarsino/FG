@@ -19,16 +19,16 @@
 #define enFR2 43 // orange
 
 // motorFR
-#define encoderFRA 50
-#define encoderFRB 51
+#define encoderFRA 52
+#define encoderFRB 53
 
 // driverBR
 #define enBR1 44 // orange
 #define enBR2 45 // yellow
 
 // motorBR
-#define encoderBRA 52
-#define encoderBRB 53
+#define encoderBRA 50
+#define encoderBRB 51
 
 // motor pins
 #define motorPinBL 2 // grey
@@ -168,16 +168,16 @@ void loop() {
     serialResponse  = Serial.readString();
 		if(serialResponse.length() < 5){
 			swBL = serialResponse.substring(1,2);
-			swFL = serialResponse.substring(1,2);
-			swFR = serialResponse.substring(1,2);
-			swBR = serialResponse.substring(1,2);
+			swFL = swBL;
+			swFR = swBL;
+			swBR = swBL;
 
 			velBL = serialResponse.substring(2,5).toDouble();
-			velFL = serialResponse.substring(2,5).toDouble();
-			velFR = serialResponse.substring(2,5).toDouble();
-			velBR = serialResponse.substring(2,5).toDouble();
+			velFL = velBL;
+			velFR = velBL;
+			velBR = velBL;
 		}
-		else{
+		else {
 	 		swBL = serialResponse.substring(1,2);
 		  velBL = serialResponse.substring(2,5).toDouble();
 	
