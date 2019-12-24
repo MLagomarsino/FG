@@ -145,16 +145,16 @@ void setup() {
   pinMode(enBR2, OUTPUT);
   pinMode (encoderBRA, INPUT); // quelli che vengono dal motore
   pinMode (encoderBRB, INPUT);
-  attachInterrupt(digitalPinToInterrupt(encoderFRA), checkBRA, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(encoderFRB), checkBRB, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoderBRA), checkBRA, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoderBRB), checkBRB, CHANGE);
   digitalWrite(enBR1, LOW);
   digitalWrite(enBR2, HIGH);
   
   t_start = millis();
   analogWrite(motorPinBL, 200); // era commentato
-  analogWrite(motorPinFL, 200); // era commentato
-  analogWrite(motorPinFR, 200); // era commentato
-  analogWrite(motorPinBR, 200); // era commentato  
+  analogWrite(motorPinFL, 200); 
+  analogWrite(motorPinFR, 200); 
+  analogWrite(motorPinBR, 200);
   
   Serial.println("<Arduino is ready>");
   Serial.flush();
@@ -168,14 +168,14 @@ void loop() {
     serialResponse  = Serial.readString();
 		if(serialResponse.length() < 5){
 			swBL = serialResponse.substring(1,2);
-			swFL = swBL;
-			swFR = swFL;
-			swBR = swFR;
+			swFL = serialResponse.substring(1,2);
+			swFR = serialResponse.substring(1,2);
+			swBR = serialResponse.substring(1,2);
 
 			velBL = serialResponse.substring(2,5).toDouble();
-			velFL = velBL;
-			velFR = velFL;
-			velBR = velFR;
+			velFL = serialResponse.substring(2,5).toDouble();
+			velFR = serialResponse.substring(2,5).toDouble();
+			velBR = serialResponse.substring(2,5).toDouble();
 		}
 		else{
 	 		swBL = serialResponse.substring(1,2);
@@ -268,25 +268,25 @@ void printMotorInfo(int motor){  // display data
   	
 		switch(motor){
 			case 1: 
-				Serial.print("< BL RPM:"); 
+				Serial.print("< BL RPS:"); 
 				Serial.print(speed_actBL);
 				Serial.print("  PWM:");  
 			 	Serial.print(PWM_valBL);   
 				break;
 			case 2: 
-				Serial.print("< FL RPM:"); 
+				Serial.print("< FL RPS:"); 
 				Serial.print(speed_actFL);
 				Serial.print("  PWM:");  
 			 	Serial.print(PWM_valFL);   
 				break;
 			case 3: 
-				Serial.print("< FR RPM:"); 
+				Serial.print("< FR RPS:"); 
 				Serial.print(speed_actFR);
 				Serial.print("  PWM:");  
 			 	Serial.print(PWM_valFR);    
 				break;				
 			case 4: 
-				Serial.print("< BR RPM"); 
+				Serial.print("< BR RPS"); 
 				Serial.print(speed_actBR);
 				Serial.print("  PWM:");  
 			 	Serial.print(PWM_valBR);  
