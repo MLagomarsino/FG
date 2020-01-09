@@ -166,7 +166,9 @@ void loop() {
 
   if(Serial.available()) {
     serialResponse  = Serial.readString();
-		if(serialResponse.length() < 5){
+ 
+		if(serialResponse.substring(6,7) == ""){
+   
 			swBL = serialResponse.substring(1,2);
 			swFL = swBL;
 			swFR = swBL;
@@ -256,44 +258,39 @@ void loop() {
     analogWrite(motorPinFR, PWM_valFR);  
     analogWrite(motorPinBR, PWM_valBR);  
 	}
-  printMotorInfo(1);  
-	printMotorInfo(2);  
-	printMotorInfo(3);  
-	printMotorInfo(4);  
+  printMotorInfo(); 
 }
 
-void printMotorInfo(int motor){  // display data
+void printMotorInfo(){  // display data
 	if((millis()-lastMilliPrint) >= 500){                     
   	lastMilliPrint = millis();
-  	
-		switch(motor){
-			case 1: 
-				Serial.print("< BL RPS:"); 
-				Serial.print(speed_actBL);
-				Serial.print("  PWM:");  
-			 	Serial.print(PWM_valBL);   
-				break;
-			case 2: 
-				Serial.print("< FL RPS:"); 
-				Serial.print(speed_actFL);
-				Serial.print("  PWM:");  
-			 	Serial.print(PWM_valFL);   
-				break;
-			case 3: 
-				Serial.print("< FR RPS:"); 
-				Serial.print(speed_actFR);
-				Serial.print("  PWM:");  
-			 	Serial.print(PWM_valFR);    
-				break;				
-			case 4: 
-				Serial.print("< BR RPS"); 
-				Serial.print(speed_actBR);
-				Serial.print("  PWM:");  
-			 	Serial.print(PWM_valBR);  
-				break;       
-			}         
-      Serial.print(" > \n"); 
- }
+ 
+		Serial.print("< BL RPS:"); 
+		Serial.print(speed_actBL);
+		Serial.print("  PWM:");  
+		Serial.print(PWM_valBL); 
+    Serial.print(" > \n");   
+				
+		Serial.print("< FL RPS:"); 
+		Serial.print(speed_actFL);
+		Serial.print("  PWM:");  
+		Serial.print(PWM_valFL);   
+	  Serial.print(" > \n"); 
+   
+		Serial.print("< FR RPS:"); 
+		Serial.print(speed_actFR);
+		Serial.print("  PWM:");  
+		Serial.print(PWM_valFR);    
+		Serial.print(" > \n"); 
+		
+		Serial.print("< BR RPS:"); 
+		Serial.print(speed_actBR);
+		Serial.print("  PWM:");  
+		Serial.print(PWM_valBR);  
+		Serial.print(" > \n"); 	    
+    
+    Serial.print(" > \n");          
+  }
 }
 
 int updatePid(int motor, int command, double targetValue, double currentValue){ // compute PWM value
