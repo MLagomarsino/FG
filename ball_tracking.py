@@ -16,100 +16,23 @@ import cv2
 import roslib
 import rospy
 
-######### FOR ARDUINO ########
-import serial
-import threading
-
-startMarker = '<'
-endMarker = '>'
-dataStarted = False
-dataBuf = ""
-messageComplete = False
-go = True
-
 # Ros Messages
 from sensor_msgs.msg import CompressedImage
+from geometry_msgs.msg import Point
 
-VERBOSE=False
-
-def rec():
-    arduinoReply = recvLikeArduino()
-    if not (arduinoReply == 'XXX'):
-        print("Time %s  Reply %s" % (time.time(), arduinoReply))
-
-
-def setupSerial(baudRate, serialPortName):
-    global serialPort
-    serialPort = serial.Serial(port=serialPortName, baudrate=baudRate, timeout=0, rtscts=True)
-    print("Serial port " + serialPortName + " opened  Baudrate " + str(baudRate))
-    waitForArduino()
-
-
-def waitForArduino():
-
-    # wait until the Arduino sends 'Arduino is ready' - allows time for Arduino reset
-    # it also ensures that any bytes left over from a previous message are discarded
-
-    print("Waiting for Arduino to reset")
-
-    msg = ""
-    while msg.find("Arduino is ready") == -1:
-        msg = recvLikeArduino()
-        if not (msg == 'XXX'):
-            print(msg)
-
-
-def recvLikeArduino():
-
-    global startMarker, endMarker, serialPort, dataStarted, dataBuf, messageComplete
-
-    if serialPort.inWaiting() > 0 and messageComplete == False:
-        x = serialPort.read().decode("utf-8") # decode needed for Python3
-
-        if dataStarted:
-            if x != endMarker:
-                dataBuf = dataBuf + x
-            else:
-                dataStarted = False
-                messageComplete = True
-        elif x == startMarker:
-            dataBuf = ''
-            dataStarted = True
-
-    if messageComplete:
-        messageComplete = False
-        return dataBuf
-    else:
-        return "XXX"
-
-
-def sendToArduino(stringToSend):
-
-    # this adds the start and end-markers before sending
-    global startMarker, endMarker, serialPort
-
-    stringWithMarkers = (startMarker)
-    stringWithMarkers += stringToSend
-    stringWithMarkers += (endMarker)
-    serialPort.write(stringWithMarkers.encode('utf-8'))  # encode needed for Python3
-    print(stringToSend)
-
-# ==================
-
+VERBOSE = False
 
 class image_feature:
 
     def __init__(self):
-        '''Initialize ros publisher, ros subscriber'''
-        # topic where we publish
-        self.image_pub = rospy.Publisher("/output/image_raw/compressed",
-            CompressedImage, queue_size = 1)
+		# topic where we publish
+		self.ball_coord = rospy.Publisher("/ball_coord", Point, queue_size = 1)
+		self.image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage, queue_size = 1)
 
-        # subscribed Topic
-        self.subscriber = rospy.Subscriber("/raspicam_node/image/compressed",
-            CompressedImage, self.callback,  queue_size = 1)
-        if VERBOSE :
-            print "subscribed to /raspicam_node/image/compressed"
+		# subscribed Topic
+		self.subscriber = rospy.Subscriber("/raspicam_node/image/compressed", CompressedImage, self.callback,  queue_size = 1)
+		if VERBOSE :
+			print "subscribed to /raspicam_node/image/compressed"
 
 
     def callback(self, ros_data):
@@ -174,36 +97,30 @@ class image_feature:
 				(0, 255, 255), 2)
 			cv2.circle(image_np, center, 5, (0, 0, 255), -1)
  		
-		imagePoints = np.zeros((5, 2))
-		imagePoints[0] = (x, y)
-		imagePoints[1] = (x + radius/2, y)
-		imagePoints[2] = (x - radius/2, y)
-		imagePoints[3] = (x, y - radius/2)
-		imagePoints[4] = (x, y + radius/2)
+			imagePoints = np.zeros((5, 2))
+			imagePoints[0] = (x, y)
+			imagePoints[1] = (x + radius/2, y)
+			imagePoints[2] = (x - radius/2, y)
+			imagePoints[3] = (x, y - radius/2)
+			imagePoints[4] = (x, y + radius/2)
 
-		retval, rvec, tvec = cv2.solvePnP(objectPoints, imagePoints, np.asarray(camera_matrix), np.asarray(distortion_coeff), False, cv2.SOLVEPNP_EPNP)
+			retval, rvec, tvec = cv2.solvePnP(objectPoints, imagePoints, np.asarray(camera_matrix), np.asarray(distortion_coeff), False, cv2.SOLVEPNP_EPNP)
+			
+			print(tvec)
+			ball_centroid  = Point(x = tvec[0], y = tvec[1], z = tvec[2])
+        	self.ball_coord.publish(ball_centroid)
 		
-		print(tvec)
 		# update the points queue
 		#pts.appendleft(center)
         cv2.imshow('window', image_np)
         cv2.waitKey(2)
-
-        if(x > -40 and x < 40):
-            sendToArduino("0.5 0.5 0.5 0.5")
-        elif(x < -40):
-            sendToArduino("-0.5 -0.5 0.5 0.5")
-        elif(x > 40):
-            sendToArduino("0.5 0.5 -0.5 -0.5")
-
+        
 		# for n in range(0, 1000000):
 		# rec()		
 
         #self.subscriber.unregister()
 
 def main(args):
-
-    setupSerial(115200, "/dev/ttyACM0")
 
     ic = image_feature()
 	
