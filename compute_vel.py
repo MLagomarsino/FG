@@ -1,4 +1,4 @@
-
+import rospy
 import serial
 import time
 import threading
@@ -79,7 +79,8 @@ def callback():
 
     x = Point.x
     z = Point.z
-
+    print(x)
+    print(y)
     if(x > 30):
         sendToArduino("+0.5 +0.5 -0.5 -0.5")
     elif(x < -30):
@@ -91,13 +92,13 @@ def callback():
             sendToArduino("+0.0")
 
 setupSerial(115200, "/dev/ttyACM0")
-
+rospy.init_node('compute_vel', anonymous=True)
 subscriber = rospy.Subscriber("/ball_coord", Point, callback,  queue_size = 1)
 
 try:
     rospy.spin()
 except KeyboardInterrupt:
-    print "Shutting down ROS Image feature detector module"
+    print("Shutting down")
     
 for n in range(0, 1000000):
     rec()
