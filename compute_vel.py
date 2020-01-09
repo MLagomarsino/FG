@@ -11,6 +11,11 @@ dataStarted = False
 dataBuf = ""
 messageComplete = False
 
+goStraight = False
+turnRight = False
+turnLeft = False
+stop = False
+
 
 def rec():
     arduinoReply = recvLikeArduino()
@@ -76,28 +81,40 @@ def waitForArduino():
 
 
 def callback(msg):
+
+    global goStraight = False
+    global turnRight = False
+    global turnLeft = False
+    global stop = False
     x = msg.x
     z = msg.z
     print(x)
     print(z)
     if(x > 30):
-        sendToArduino("+0.5 +0.5 -0.5 -0.5")
+        turnRight = True
     elif(x < -30):
-        sendToArduino("-0.5 -0.5 +0.5 +0.5")
+        turnLeft = True
     else:
         if(z > 20):
-            sendToArduino("+0.5")
+            goStraight = True
         else:
-            sendToArduino("+0.0")
+            stop = True
 
 setupSerial(115200, "/dev/ttyACM0")
 rospy.init_node('compute_vel')
 subscriber = rospy.Subscriber("/ball_coord", Point, callback)
-
-try:
-    rospy.spin()
-except KeyboardInterrupt:
-    print("Shutting down")
+   
+while True: 
+    rospy.spinOnce()
     
-for n in range(0, 1000000):
+    if(turnRight):    
+        sendToArduino("+0.5 +0.5 -0.5 -0.5")
+    elif(turnLeft):
+        sendToArduino("-0.5 -0.5 +0.5 +0.5")
+    elif(goStraight):
+        sendToArduino("+0.5")
+    else:
+        sendToArduino("+0.0")
+    
+for n in range(0, 1000):
     rec()
