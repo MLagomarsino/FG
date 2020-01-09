@@ -75,10 +75,9 @@ def waitForArduino():
             print(msg)
 
 
-def callback():
-
-    x = Point.x
-    z = Point.z
+def callback(msg):
+    x = msg.x
+    z = msg.z
     print(x)
     print(y)
     if(x > 30):
@@ -92,8 +91,8 @@ def callback():
             sendToArduino("+0.0")
 
 setupSerial(115200, "/dev/ttyACM0")
-rospy.init_node('compute_vel', anonymous=True)
-subscriber = rospy.Subscriber("/ball_coord", Point, callback,  queue_size = 1)
+rospy.init_node('compute_vel')
+subscriber = rospy.Subscriber("/ball_coord", Point, callback)
 
 try:
     rospy.spin()
