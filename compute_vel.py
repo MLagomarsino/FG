@@ -83,14 +83,16 @@ def callback(msg):
     print(z)
     global oldRPS
     
-    if(x > 300): 
+    if(x > 250): 
         newRPS = "+0.2 +0.2 -0.2 -0.2"
-        if(newRPS != oldRPS):
+        if(oldRPS == "+0.2 +0.2 +0.2 +0.2" && x > 400):
+            # old is go straight
             sendToArduino(newRPS)
             oldRPS = newRPS
-    elif(x < -300):
+            
+    elif(x < -250):
         newRPS = "-0.2 -0.2 +0.2 +0.2"
-        if(newRPS != oldRPS):
+        if(oldRPS == "+0.2 +0.2 +0.2 +0.2" && x > 400):
             sendToArduino(newRPS)
             oldRPS = newRPS
     else:
@@ -110,7 +112,4 @@ rospy.init_node('compute_vel')
 subscriber = rospy.Subscriber("/ball_coord", Point, callback)
    
 rospy.spin()
-        
-    
-#for n in range(0, 1000):
-#   rec()
+   
