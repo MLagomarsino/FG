@@ -80,12 +80,12 @@ def callback(msg):
     z = msg.z
     print(x)
     print(z)
-    if(x > 30):  
+    if(x > 300):  
         sendToArduino("+0.5 +0.5 -0.5 -0.5")
-    elif(x < -30):
+    elif(x < -300):
         sendToArduino("-0.5 -0.5 +0.5 +0.5")
     else:
-        if(z > 20):
+        if(z > 200):
             sendToArduino("+0.5") 
         else:
             sendToArduino("+0.0")

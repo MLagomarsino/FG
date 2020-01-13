@@ -75,8 +75,7 @@ class image_feature:
 	mask = cv2.erode(mask, None, iterations=2)
 	mask = cv2.dilate(mask, None, iterations=2)
 	#cv2.imshow('mask', mask)
-	cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
-		cv2.CHAIN_APPROX_SIMPLE)
+	cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 	cnts = imutils.grab_contours(cnts)
 	center = None
 	# only proceed if at least one contour was found
@@ -105,11 +104,11 @@ class image_feature:
 			imagePoints[4] = (x, y + radius/2)
 
 			retval, rvec, tvec = cv2.solvePnP(objectPoints, imagePoints, np.asarray(camera_matrix), np.asarray(distortion_coeff), False, cv2.SOLVEPNP_EPNP)
+			if(tvec.all() is not None):
+				print(tvec)
+				ball_centroid  = Point(x = tvec[0], y = tvec[1], z = tvec[2])
+				self.ball_coord.publish(ball_centroid)
 			
-			print(tvec)
-			ball_centroid  = Point(x = tvec[0], y = tvec[1], z = tvec[2])
-        	self.ball_coord.publish(ball_centroid)
-		
 		# update the points queue
 		#pts.appendleft(center)
         cv2.imshow('window', image_np)
