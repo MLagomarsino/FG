@@ -92,7 +92,7 @@ def callback(msg):
             
     elif(x < -250):
         newRPS = "-0.2 -0.2 +0.2 +0.2"
-        if(oldRPS == "+0.2 +0.2 +0.2 +0.2" and x > 400):
+        if(oldRPS == "+0.2 +0.2 +0.2 +0.2" and x < -400):
             sendToArduino(newRPS)
             oldRPS = newRPS
     else:
