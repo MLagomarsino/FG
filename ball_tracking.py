@@ -45,16 +45,16 @@ class image_feature:
         np_arr = np.fromstring(ros_data.data, np.uint8)
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR) # OpenCV >= 3.0:
 
-	camera_matrix = [[525.147618, 0, 354.302703],
-					 [0, 523.497746, 222.146580],
-					 [0, 0, 1]]
+	camera_matrix = [[239.311758, 0, 156.442041],
+                     [0, 238.756569, 120.177064],
+                     [0, 0, 1]]
 
-	distortion_coeff = [[0.212992,
-						-0.230448,
-						-0.013299,
-						 0.027759,
-						 0]]
-
+	distortion_coeff = [[0.107782,
+	                   -0.225106,
+	                    0.003817,
+	                   -0.006264, 
+	                    0]]
+	                    
 	objectPoints = np.zeros((5,3))
 	objectPoints[0] = (0, 0, 0)
 	objectPoints[1] = (-27, 0, 0)
