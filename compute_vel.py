@@ -95,7 +95,7 @@ def callback(msg):
             oldRPS = newRPS
     else:
         if(z > 200):
-            newRPS = "+0.2 +0.2 -0.2 -0.2"
+            newRPS = "+0.2 +0.2 +0.2 +0.2"
             if(newRPS != oldRPS):
                 sendToArduino(newRPS)
                 oldRPS = newRPS 
