@@ -10,6 +10,7 @@ endMarker = '>'
 dataStarted = False
 dataBuf = ""
 messageComplete = False
+oldRPS = "+0.0 +0.0 +0.0 +0.0"
 
 def rec():
     arduinoReply = recvLikeArduino()
@@ -80,7 +81,8 @@ def callback(msg):
     z = msg.z
     print(x)
     print(z)
-    oldRPS = "+0.0 +0.0 +0.0 +0.0"
+    global oldRPS
+    
     if(x > 300): 
         newRPS = "+0.5 +0.5 -0.5 -0.5"
         if(newRPS != oldRPS):
