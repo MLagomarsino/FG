@@ -83,23 +83,23 @@ def callback(msg):
     oldRPS = "+0.0 +0.0 +0.0 +0.0"
     if(x > 300): 
         newRPS = "+0.5 +0.5 -0.5 -0.5"
-        if(newRPS != oldRPS)
+        if(newRPS != oldRPS):
             sendToArduino(newRPS)
             oldRPS = newRPS
     elif(x < -300):
         newRPS = "-0.5 -0.5 +0.5 +0.5"
-        if(newRPS != oldRPS)
+        if(newRPS != oldRPS):
             sendToArduino(newRPS)
             oldRPS = newRPS
     else:
         if(z > 200):
             newRPS = "+0.5 +0.5 -0.5 -0.5"
-            if(newRPS != oldRPS)
+            if(newRPS != oldRPS):
                 sendToArduino(newRPS)
                 oldRPS = newRPS 
         else:
             newRPS = "+0.0 +0.0 +0.0 +0.0"
-            if(newRPS != oldRPS)
+            if(newRPS != oldRPS):
                 sendToArduino(newRPS)
                 oldRPS = newRPS
 
