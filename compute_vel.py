@@ -80,15 +80,28 @@ def callback(msg):
     z = msg.z
     print(x)
     print(z)
-    if(x > 300):  
-        sendToArduino("+0.5 +0.5 -0.5 -0.5")
+    oldRPS = "+0.0 +0.0 +0.0 +0.0"
+    if(x > 300): 
+        newRPS = "+0.5 +0.5 -0.5 -0.5"
+        if(newRPS != oldRPS)
+            sendToArduino(newRPS)
+            oldRPS = newRPS
     elif(x < -300):
-        sendToArduino("-0.5 -0.5 +0.5 +0.5")
+        newRPS = "-0.5 -0.5 +0.5 +0.5"
+        if(newRPS != oldRPS)
+            sendToArduino(newRPS)
+            oldRPS = newRPS
     else:
         if(z > 200):
-            sendToArduino("+0.5 +0.5 +0.5 +0.5") 
+            newRPS = "+0.5 +0.5 -0.5 -0.5"
+            if(newRPS != oldRPS)
+                sendToArduino(newRPS)
+                oldRPS = newRPS 
         else:
-            sendToArduino("+0.0 +0.0 +0.0 +0.0")
+            newRPS = "+0.0 +0.0 +0.0 +0.0"
+            if(newRPS != oldRPS)
+                sendToArduino(newRPS)
+                oldRPS = newRPS
 
 setupSerial(115200, "/dev/ttyACM0")
 rospy.init_node('compute_vel')
