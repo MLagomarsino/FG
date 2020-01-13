@@ -86,9 +86,9 @@ def callback(msg):
         sendToArduino("-0.5 -0.5 +0.5 +0.5")
     else:
         if(z > 200):
-            sendToArduino("+0.5") 
+            sendToArduino("+0.5 +0.5 +0.5 +0.5") 
         else:
-            sendToArduino("+0.0")
+            sendToArduino("+0.0 +0.0 +0.0 +0.0")
 
 setupSerial(115200, "/dev/ttyACM0")
 rospy.init_node('compute_vel')
