@@ -108,7 +108,11 @@ class image_feature:
 			
 			print(tvec)
 			ball_centroid  = Point(x = tvec[0], y = tvec[1], z = tvec[2])
-        	self.ball_coord.publish(ball_centroid)
+		
+		else:  #the robot does not see the ball
+			ball_centroid  = Point(x = 0, y = 0, z = 0)
+
+		self.ball_coord.publish(ball_centroid)
 		
 		# update the points queue
 		#pts.appendleft(center)

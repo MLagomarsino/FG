@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<robot>
+	<!-- Materials -->
+	<gazebo reference="base_link"> <!-- reference to the link described in the xacro file -->
+		<material>Gazebo/Red</material>
+	</gazebo>
+	<gazebo reference="wheel_1">
+		<material>Gazebo/Black</material>
+	</gazebo>
+	<gazebo reference="wheel_2">
+		<material>Gazebo/Black</material>
+	</gazebo>
+	<gazebo reference="wheel_3">
+		<material>Gazebo/Black</material>
+	</gazebo>
+	<gazebo reference="wheel_4">
+		<material>Gazebo/Black</material>
+	</gazebo>
+
+    <!-- ros_control plugin -->
+	<gazebo>
+		<plugin name="object_controller" filename="libgazebo_ros_planar_move.so">
+	    	<commandTopic>cmd_vel</commandTopic>
+	      	<odometryTopic>odom</odometryTopic>
+	      	<odometryFrame>odom</odometryFrame>
+	      	<odometryRate>20.0</odometryRate>
+	      	<robotBaseFrame>base_link</robotBaseFrame>
+	    </plugin>
+  	</gazebo>
+
+</robot>

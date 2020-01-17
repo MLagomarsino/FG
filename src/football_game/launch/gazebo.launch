@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<launch>
+	<arg name="r_x" />
+    <arg name="r_y" />
+
+    <!-- Starting the example in the empty world scenario -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch"> 
+        <arg name="paused" value="true"/>
+    </include>
+
+    <!-- Load the URDF into the ROS Parameter Server -->
+    <param name="/football_game" command="$(find xacro)/xacro --inorder $(find football_game)/urdf/robot.xacro"/>
+
+    <!-- Define parameters to be passed as arguments -->
+    <param name="r_x" value="$(arg r_x)" />
+    <param name="r_y" value="$(arg r_y)" />
+
+    <!-- Launching the spawner and the controller for robot1 -->
+    <!-- group tag only serves to group nodes that I want to launch in the same namespace -->
+
+    <param name="tf_prefix" value="robot_tf" />
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+    	args="-urdf -model -param football_game -x $(arg r_x) -y $(arg r_y) -z 0.05"/> 
+    <node name="controller" pkg="football_game" type="compute_goal" />
+
+    <!-- Launch compute_goal node -->
+    <node name="tf_broadcaster" pkg="football_game" type="tf_broadcaster" output="screen" cwd="node"/>
+</launch>
