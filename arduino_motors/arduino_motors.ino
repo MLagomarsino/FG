@@ -258,7 +258,7 @@ void loop() {
     analogWrite(motorPinFR, PWM_valFR);  
     analogWrite(motorPinBR, PWM_valBR);  
 	}
-  printMotorInfo(); 
+  //printMotorInfo(); 
 }
 
 void printMotorInfo(){  // display data

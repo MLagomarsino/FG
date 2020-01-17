@@ -10,7 +10,7 @@ endMarker = '>'
 dataStarted = False
 dataBuf = ""
 messageComplete = False
-oldRPS = "+0.0 +0.0 +0.0 +0.0"
+
 
 def rec():
     arduinoReply = recvLikeArduino()
@@ -76,40 +76,27 @@ def waitForArduino():
 
 
 def callback(msg):
- 
     x = msg.x
     z = msg.z
     print(x)
     print(z)
-    global oldRPS
-    
-    if(x > 250): 
-        newRPS = "+0.2 +0.2 -0.2 -0.2"
-        if((oldRPS == "+0.0 +0.0 +0.0 +0.0") or (oldRPS == "+0.2 +0.2 +0.2 +0.2" and x > 400)):
-            # old is go straight
-            sendToArduino(newRPS)
-            oldRPS = newRPS
-            
-    elif(x < -250):
-        newRPS = "-0.2 -0.2 +0.2 +0.2"
-        if((oldRPS == "+0.0 +0.0 +0.0 +0.0") or (oldRPS == "+0.2 +0.2 +0.2 +0.2" and x < -400)):
-            sendToArduino(newRPS)
-            oldRPS = newRPS
+    if(x > 30):
+        sendToArduino("+0.5 +0.5 -0.5 -0.5")
+    elif(x < -30):
+        sendToArduino("-0.5 -0.5 +0.5 +0.5")
     else:
-        if(z > 200):
-            newRPS = "+0.2 +0.2 +0.2 +0.2"
-            if(newRPS != oldRPS):
-                sendToArduino(newRPS)
-                oldRPS = newRPS 
+        if(z > 20):
+            sendToArduino("+0.5 +0.5 +0.5 +0.5")
         else:
-            newRPS = "+0.0 +0.0 +0.0 +0.0"
-            if(newRPS != oldRPS):
-                sendToArduino(newRPS)
-                oldRPS = newRPS
+            sendToArduino("+0.0")
 
-setupSerial(115200, "/dev/ttyACM0")
-rospy.init_node('compute_vel')
+setupSerial(115200, "/dev/ttyACM0")rospy.init_node('compute_vel')
 subscriber = rospy.Subscriber("/ball_coord", Point, callback)
-   
-rospy.spin()
-   
+
+try:
+    rospy.spin()
+except KeyboardInterrupt:
+    print("Shutting down")
+    
+for n in range(0, 1000000):
+    rec()
