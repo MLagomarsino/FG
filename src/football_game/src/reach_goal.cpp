@@ -18,7 +18,7 @@ bool reach_goal(football_game::ReachGoal::Request &req, football_game::ReachGoal
 	double dist_x, dist_y = 0;
 	// Motion along y
 
-	while(abs(robot_pos_x - req.robot_des.pose.pose.position.x) > 50 || abs(robot_pos_y - req.robot_des.pose.pose.position.y) > 50){
+	if(abs(robot_pos_x - req.robot_des.pose.pose.position.x) > 50 || abs(robot_pos_y - req.robot_des.pose.pose.position.y) > 50){
 		dist_x = robot_pos_x - req.robot_des.pose.pose.position.x;
 		dist_y = robot_pos_y - req.robot_des.pose.pose.position.y;
 		// inf and sup limits to limit robot velocity
