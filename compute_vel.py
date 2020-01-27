@@ -126,7 +126,7 @@ def callbackVelocities(vel):
 		wheelBR = vel.linear.x * (+1.0) + vel.linear.y * (+1.0)
 
 	RPS = wheelBL + " " + wheelFL + " "+ wheelFR + " " + wheelBR
-
+	print(RPS)
 	sendToArduino(RPS)
 	
 
