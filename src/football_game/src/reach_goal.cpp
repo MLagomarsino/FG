@@ -17,20 +17,31 @@ bool reach_goal(football_game::ReachGoal::Request &req, football_game::ReachGoal
 	geometry_msgs::Twist vel;
 	double dist_x, dist_y = 0;
 	// Motion along y
+
 	while(abs(robot_pos_x - req.robot_des.pose.pose.position.x) > 50 || abs(robot_pos_y - req.robot_des.pose.pose.position.y) > 50){
 		dist_x = robot_pos_x - req.robot_des.pose.pose.position.x;
 		dist_y = robot_pos_y - req.robot_des.pose.pose.position.y;
-
+		// inf and sup limits to limit robot velocity
 		if (abs(dist_x) > 50)
 			vel.linear.x = -0.5*(dist_x); 
+			if(vel.linear.x>1)
+				vel.linear.x=1;
+			else if (vel.linear.x<-1)
+				vel.linear.x=-1;
 		else
 			vel.linear.x = 0;
 		if (abs(dist_y) > 50)
 			vel.linear.y = -0.5*(dist_y);
+			if(vel.linear.y>1)
+				vel.linear.y=1;
+			else if (vel.linear.y<-1)
+				vel.linear.y=-1;
 		else
 			vel.linear.y =0;
 	}
 	// Goal reached 
+	std::cout << vel.linear.x;
+	std::cout << vel.linear.y;
 	
 	// Publish the velocity
 	pub_vel.publish(vel);     
@@ -60,10 +71,10 @@ int main(int argc, char ** argv)
 {
 	ros::init(argc, argv, "reach_goal");
 	ros::NodeHandle n;
-	pub_vel = n.advertise<geometry_msgs::Twist>("robot_vel", 1000);
+	pub_vel = n.advertise<geometry_msgs::Twist>("cmd_vel", 1000);
 	ros::ServiceServer server_reach_goal = n.advertiseService("reach_goal", reach_goal);
 	
-	// Subscribert to the odom topic in order to get the current robot position
+	// Subscriber to the odom topic in order to get the current robot position
 	ros::Subscriber sub_odom = n.subscribe("odom", 1000, odomCallback);
 
 	ros::spin();

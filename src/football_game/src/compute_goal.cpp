@@ -67,6 +67,7 @@ public:
      */
     void ballPosCallback(const geometry_msgs::Point &ball_pos)
 	{
+		std::cout <<"qui ci vado"<<std::endl;
 		x_ball = ball_pos.x;
 		y_ball = ball_pos.z;
 
@@ -166,6 +167,8 @@ int main(int argc, char ** argv)
 
 	// Publisher of the goal position
 	pub_goal = n.advertise<nav_msgs::Odometry>("/goal", 1);
+	
+	client_reach_goal = n.serviceClient<football_game::ReachGoal>("/reach_goal");
     	
 	ros::Rate r(10000);
 
