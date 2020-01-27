@@ -21,6 +21,7 @@
     	args="-urdf -model -param football_game -x $(arg r_x) -y $(arg r_y) -z 0.05"/> 
     <node name="controller" pkg="football_game" type="compute_goal" output="screen" />
 
+    <!-- Launch the service which publishes the velocities to reach the goal -->
     <node name="service" pkg="football_game" type="reach_goal" output="screen" />
 
     <!-- Launch tf_broadcaster node -->

@@ -1,3 +1,4 @@
+# To test motors of the robot (on the raspberry/pc connected to the Arduino)
 
 import serial
 import time

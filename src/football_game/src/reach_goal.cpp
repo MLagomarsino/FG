@@ -6,60 +6,67 @@
 #include "geometry_msgs/Twist.h" // to publish the velocity
 
 
-float robot_pos_x;
-float robot_pos_y;
-float robot_pos_z;
-float robot_yaw;
-bool goalReached = false;
-// Publisher of the robot velocity
-ros::Publisher pub_vel;
+/*@file */
+float robot_pos_x; /*!< x coordinate of the robot */
+float robot_pos_y; /*!< y coordinate of the robot */
+float robot_pos_z; /*!< z coordinate of the robot */
+float robot_yaw; /*!< yaw angle of the robot */
 
+bool goalReached = false; /*!< goalReached flag to check if the goal has been reached */
+ros::Publisher pub_vel; /*!< publisher of the robot velocity */
+
+/** Service function
+	 * @param[in]  req		odometry message, namely current position of robot 
+	 * @param[in]  res 		boolean which tells if the goal has been reached */
 bool reach_goal(football_game::ReachGoal::Request &req, football_game::ReachGoal::Response &res)
 {
 	geometry_msgs::Twist vel;
+	// distance of the robot from the desired position (along x and y)
 	double dist_x, dist_y = 0;
-	// Motion along y
 
+	// if the robot has a certain distance from the goal, move
 	if(!goalReached && (fabs(robot_pos_x - req.robot_des.pose.pose.position.x) > 0.05 || fabs(robot_pos_y - req.robot_des.pose.pose.position.y) > 0.05)){
 		
 		dist_x = robot_pos_x - req.robot_des.pose.pose.position.x;
 		dist_y = robot_pos_y - req.robot_des.pose.pose.position.y;
-		std::cout<<"robot pos x\n"<<robot_pos_x<<"\n";
-		std::cout<<"robot pos y\n"<<robot_pos_y<<"\n";
-		std::cout<<"robot pos z\n"<<robot_pos_z<<"\n";		
-		// inf and sup limits to limit robot velocity
+		// std::cout<<"robot pos x\n"<<robot_pos_x<<"\n";
+		// std::cout<<"robot pos y\n"<<robot_pos_y<<"\n";
+		// std::cout<<"robot pos z\n"<<robot_pos_z<<"\n";		
+		
+		// linear velocity along x
 		if (fabs(dist_x) > 0.05){
-			std::cout<<"heila sono la x\n"<<dist_x<<"\n";
 			vel.linear.x = -0.5*(dist_x); 
-			if(vel.linear.x>1)
-				vel.linear.x=1;
-			else if (vel.linear.x<-1)
-				vel.linear.x=-1;
+			if(vel.linear.x > 1)
+				vel.linear.x = 1;
+			else if (vel.linear.x < -1)
+				vel.linear.x = -1;
 		}
 		else{	
-			std::cout<<"heila sono la x a zero\n"<<dist_x<<"\n";
 			vel.linear.x = 0;
 		}
 
+		// linear velocity along y
 		if (fabs(dist_y) > 0.05){
-			std::cout<<"heila sono la y\n"<<dist_y<<"\n";
 			vel.linear.y = -0.5*(dist_y);
-			if(vel.linear.y>1)
-				vel.linear.y=1;
-			else if (vel.linear.y<-1)
-				vel.linear.y=-1;
+			if(vel.linear.y > 1)
+				vel.linear.y = 1;
+			else if (vel.linear.y < -1)
+				vel.linear.y = -1;
 		}
 		else{
-			std::cout<<"heila sono la y a zero\n"<<dist_y<<"\n";
-			vel.linear.y =0;
+			vel.linear.y = 0;
 		}
 	}
-	std::cout<<"robot yaw \n"<<robot_yaw<<"\n";
+
+	// std::cout<<"robot yaw \n"<<robot_yaw<<"\n";
 	
+	// if the linear velocities are 0 (goal position reached), start rotating
 	if(vel.linear.x == 0 && vel.linear.y == 0){
 		geometry_msgs::Quaternion quat = req.robot_des.pose.pose.orientation;
 		float robot_des_yaw = asin(2*quat.x*quat.y + 2*quat.z*quat.w);
-		std::cout<<"robot des yaw \n"<<robot_des_yaw<<"\n";
+		// std::cout<<"robot des yaw \n"<<robot_des_yaw<<"\n";
+
+		// angular velocity along z
 		if(fabs(robot_yaw - robot_des_yaw) > 0.01)
 			vel.angular.z = -1*(robot_yaw - robot_des_yaw);
 		else{
@@ -68,17 +75,18 @@ bool reach_goal(football_game::ReachGoal::Request &req, football_game::ReachGoal
 		}
 	}
 	
+	// if the goal has been reached go ahead and kick the ball
 	if(goalReached)
 		vel.linear.y = -1;
 	
-	// Goal reached 
-	std::cout << "linear vel x "<<vel.linear.x<<"\n";
-	std::cout << "linear vel y "<<vel.linear.y<<"\n";
-	std::cout << "angular vel z "<<vel.angular.z<<"\n";
+	// std::cout << "linear vel x "<<vel.linear.x<<"\n";
+	// std::cout << "linear vel y "<<vel.linear.y<<"\n";
+	// std::cout << "angular vel z "<<vel.angular.z<<"\n";
 	
 	// Publish the velocity
 	pub_vel.publish(vel);   
 	
+	// wait some time, then stop and start looking again for the ball
 	if(goalReached){
 		std::cout << "Goal reached\n";
 		vel.linear.y = 0;
@@ -91,11 +99,9 @@ bool reach_goal(football_game::ReachGoal::Request &req, football_game::ReachGoal
 	return true;
 }
 
-/** Callback associated to topic ../odom
- * 
- * According to desired position, the function 
- * - computes the linear velocity of the robot and publishes it on /cmd_vel
- * - if the goal is reached, it notifies it by publishing on /goal_reached
+/** Callback associated to topic /odom 
+ *
+ * The function saves the current position and yaw of the robot in global variables
  * @param[in]  msg		odometry message  current position of the robot*/
 void odomCallback(const nav_msgs::Odometry& msg)
 {
@@ -107,9 +113,14 @@ void odomCallback(const nav_msgs::Odometry& msg)
 	robot_pos_z = msg.pose.pose.position.z;
 	geometry_msgs::Quaternion quat = msg.pose.pose.orientation;
 	robot_yaw = asin(2*quat.x*quat.y + 2*quat.z*quat.w);
-	
 }
-	
+
+
+/** Main function
+ *
+ * - definition of the publisher for /cmd_vel (topic where the velocities of the robot are published)
+ * - definition of the service reach_goal
+ * - definition of the subscriber to the /odom topic, where the odometry of the robot is published */
 int main(int argc, char ** argv) 
 {
 	ros::init(argc, argv, "reach_goal");

@@ -1,3 +1,5 @@
+# To be loaded on the raspberry - must communicate with the Arduino
+
 import rospy
 import serial
 import time
@@ -11,8 +13,8 @@ endMarker = '>'
 dataStarted = False
 dataBuf = ""
 messageComplete = False
-oldRPS = "+0.0 +0.0 +0.0 +0.0"
-RPS = ""
+oldRPS = "+0.0 +0.0 +0.0 +0.0" # to keep track of previous velocities
+RPS = "" # current velocities to be sent only if different from the old ones
 
 def rec():
     arduinoReply = recvLikeArduino()
@@ -77,38 +79,6 @@ def waitForArduino():
             print(msg)
 
 
-def callback(msg):
-
-    x = msg.x
-    z = msg.z
-    print(x)
-    print(z)
-    global oldRPS
-    
-    if(x > 250): 
-        newRPS = "+0.2 +0.2 -0.2 -0.2"
-        if((oldRPS == "+0.0 +0.0 +0.0 +0.0") or (oldRPS == "+0.2 +0.2 +0.2 +0.2" and x > 400)):
-            # old is go straight
-            sendToArduino(newRPS)
-            oldRPS = newRPS
-            
-    elif(x < -250):
-        newRPS = "-0.2 -0.2 +0.2 +0.2"
-        if((oldRPS == "+0.0 +0.0 +0.0 +0.0") or (oldRPS == "+0.2 +0.2 +0.2 +0.2" and x < -400)):
-            sendToArduino(newRPS)
-            oldRPS = newRPS
-    else:
-        if(z > 200):
-            newRPS = "+0.2 +0.2 +0.2 +0.2"
-            if(newRPS != oldRPS):
-                sendToArduino(newRPS)
-                oldRPS = newRPS 
-        else:
-            newRPS = "+0.0 +0.0 +0.0 +0.0"
-            if(newRPS != oldRPS):
-                sendToArduino(newRPS)
-                oldRPS = newRPS
-
 def callbackVelocities(vel):
 	global RPS
 	global oldRPS
@@ -123,31 +93,36 @@ def callbackVelocities(vel):
 		wheelFL = vel.linear.x * (+1.0) + vel.linear.y * (+1.0)
 		wheelFR = vel.linear.x * (-1.0) + vel.linear.y * (+1.0)
 		wheelBR = vel.linear.x * (+1.0) + vel.linear.y * (+1.0)
-	if(wheelBL >= 0):
-		wheelBLstr = "+"+str(wheelBL)
+	
+    # check the signs of the velocities, so that when it is positive, add the +
+    if(wheelBL >= 0):
+		wheelBLstr = "+" + str(wheelBL)
 	else:
 		wheelBLstr = str(wheelBL)
 	if(wheelFL >= 0):
-		wheelFLstr = "+"+str(wheelFL)
+		wheelFLstr = "+" + str(wheelFL)
 	else:
 		wheelFLstr = str(wheelFL)
 	if(wheelFR >= 0):
-		wheelFRstr = "+"+str(wheelFR)
+		wheelFRstr = "+" + str(wheelFR)
 	else:
 		wheelFRstr = str(wheelFR)
 	if(wheelBR >= 0):
-		wheelBRstr = "+"+str(wheelBR)
+		wheelBRstr = "+" + str(wheelBR)
 	else:
 		wheelBRstr = str(wheelBR)
+
 	RPS = wheelBLstr + " " + wheelFLstr + " "+ wheelFRstr + " " + wheelBRstr
 	print(RPS)
+
 	if(RPS != oldRPS):
+        # send the velocities to the arduino only if different from the previous ones
 		sendToArduino(RPS)
 		oldRPS = RPS
 
 setupSerial(115200, "/dev/ttyACM0")
 rospy.init_node('compute_vel')
-# subscriber = rospy.Subscriber("/ball_coord", Point, callback)
+# subscribe to the topic where the robot velocities are published
 subscriber = rospy.Subscriber("/cmd_vel", Twist, callbackVelocities)
    
 rospy.spin()

@@ -19,33 +19,34 @@
 
 using namespace std;
 
+
+/*@file */
 ros::Publisher pub_goal; /*!< Publisher of the goal of the robot on /goal*/
 ros::Subscriber odom_sub; /*!< Subscriber to /odom*/
 nav_msgs::Odometry robot_des; /*!< Odometry message describing the desired position of robot*/
 
 geometry_msgs::Vector3 ball_football_direction; /**< direction between ball and football goal */
 
-float x_ball; /**< X coordinate of the ball */
-float y_ball; /**< Y coordinate of the ball */
+float x_ball; /**< x coordinate of the ball */
+float y_ball; /**< y coordinate of the ball */
 
-float x_robot; /**< X coordinate of the robot */
-float y_robot; /**< Y coordinate of the robot */
+float x_robot; /**< x coordinate of the robot */
+float y_robot; /**< y coordinate of the robot */
 geometry_msgs::Quaternion orientation_robot;
 float yaw;
 
-tf::Transform world2ball;
+tf::Transform world2ball; /**< computed transform between the ball and the world */
 
 class BallPositionWorld {
 public:
     /**
-     * Transformation from Base Frame to Camera Frame
+     * Transformation from world to ball frame
      */
     tf::TransformListener listener;
      
     /** Handler:
-     * - subscribe to /camera/pcl_filtered to get filtered point cloud sent by pcl_filter
-     * - publish odometry data on /odometry/baxter/center_of_mass
-     * - publish a frame with origin in the computed center of mass and the same orientation of the Kinect 
+     * - subscribe to /ball_coord to read the position of the ball
+     * - subscribe to /odom topic to read robot odometry
      */
     BallPositionWorld()
     {
@@ -57,13 +58,13 @@ public:
 	 * @param[in]  msg		odometry message, namely current position of robot */
 	void odomCallback(const nav_msgs::Odometry& msg)
 	{
-		x_robot = msg.pose.pose.position.x; /**< X coordinate of the robot */
-		y_robot = msg.pose.pose.position.y; /**< Y coordinate of the robot */
-		orientation_robot = msg.pose.pose.orientation; /**< Orientation of the robot with respect to the world frame*/
+		x_robot = msg.pose.pose.position.x; /**< x coordinate of the robot */
+		y_robot = msg.pose.pose.position.y; /**< y coordinate of the robot */
+		orientation_robot = msg.pose.pose.orientation; /**< Orientation of the robot wrt the world frame*/
 	}
     /** 
      * Callback function
-     * @param[in]  input	point cloud data from /camera/pcl_filtered
+     * @param[in]  ball_pos position of the ball wrt the camera -(if not published from terminal)-
      */
     void ballPosCallback(const geometry_msgs::Point &ball_pos)
 	{
@@ -87,12 +88,9 @@ public:
 					tf::Transform football_goal2ball = t_football_goal2world * world2ball;
 					tf::Vector3 ball_football_direction;
 					ball_football_direction = football_goal2ball.getOrigin();
-					
-					yaw = atan((ball_football_direction.getX())/(ball_football_direction.getY() - 2.0));
-					//tf::Quaternion ball_football_quaternion;
-					//ball_football_quaternion = football_goal2ball.getRotation();
-					//yaw = asin(2*ball_football_quaternion.x()*ball_football_quaternion.y() + 2*ball_football_quaternion.z()*ball_football_quaternion.w());
 
+					// compute yaw angle between football goal and the ball, usefull to kick the ball
+					yaw = atan((ball_football_direction.getX())/(ball_football_direction.getY() - 2.0));
 				}
 				catch (tf::TransformException &ex){
 					ROS_WARN("World to robot transform unavailable %s", ex.what());
@@ -108,9 +106,9 @@ public:
 }
 
 protected:
-	tf::StampedTransform t_world2robot;	/**< Transformation from world frame to camera link frame*/
-	tf::StampedTransform t_football_goal2world;	/**< Transformation from camera link frame to camera depth optical frame*/
-	tf::StampedTransform t_robot2ball;
+	tf::StampedTransform t_world2robot;	/**< Transformation from world_frame to robot_frame*/
+	tf::StampedTransform t_football_goal2world;	/**< Transformation from football_goal_frame to world_frame*/
+	tf::StampedTransform t_robot2ball; /**< Transformation from robot_frame to ball_frame*/
 
     ros::NodeHandle nh;		/**< Node Handler */
     ros::Subscriber ball_pos_sub; /**< Subscriber to /ball_coord */
@@ -118,22 +116,23 @@ protected:
 
 /** The function:
  * - acquires the initial position of the robot (robot_des of the previous loop)
- * @param[in]  robot_des	odometry message specifing the initial position of the robot (desired position of the previous loop)
  * @param[out]  robot_des	odometry message specifing the desired robot position
  */
 nav_msgs::Odometry compute_plan()
 {
-	tf::Vector3 ball_point(x_ball,y_ball,0);
+	tf::Vector3 ball_point(x_ball, y_ball, 0);
 	tf::Vector3 ball_wrt_world;
 	// ball wrt world frame
-	// ball_wrt_world = world2ball * ball_point; // questo vale nella realta quando la posizione della pallina cambia 
+	// ball_wrt_world = world2ball * ball_point; // ONLY WHEN USING THE REAL ROBOT (the position of the ball is published wrt robot frame) 
 	ball_wrt_world = ball_point;
+
 	double r = 0.5; // radius from the ball
 	robot_des.pose.pose.position.x = ball_wrt_world.getX() + r*sin(yaw);
 	robot_des.pose.pose.position.y = ball_wrt_world.getY() + r*cos(yaw);
-	std::cout<<"robot des pos x "<<robot_des.pose.pose.position.x<<"\n";
-	std::cout<<"robot des pos y "<<robot_des.pose.pose.position.y <<"\n";
 	robot_des.pose.pose.position.z = 0;
+	// std::cout<<"robot des pos x "<<robot_des.pose.pose.position.x<<"\n";
+	// std::cout<<"robot des pos y "<<robot_des.pose.pose.position.y <<"\n";
+
 	tf::Quaternion quat;
 	quat.setRPY(0,0,yaw);
 	robot_des.pose.pose.orientation.x = quat.x();
@@ -146,10 +145,9 @@ nav_msgs::Odometry compute_plan()
 
 /**
  * Main function:
- * - subscribe to /odom to know the current position of the robot 
- * - subscribe to /ball_coord to know the position of the ball wrt the robot
- * - compute and publish on /goal the goal position of the robot
- * - 
+ *
+ * - definition of the publisher of the /goal topic where the goal position of the robot is published
+ * - declare and call the reach_goal service 
  * @param[in]  r_x			x coordinate of the robot
  * @param[in]  r_y			y coordinate of the robot
  */
@@ -176,7 +174,7 @@ int main(int argc, char ** argv)
 	ros::Rate r(10000);
 
 	while(ros::ok()){
-
+		// if the ball has been detected, compute desired position and call the service
 		if (x_ball != 0 && y_ball != 0){
 			robot_des = compute_plan();
 			football_game::ReachGoal srv;
