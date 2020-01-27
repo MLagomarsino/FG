@@ -2,8 +2,9 @@ import rospy
 import serial
 import time
 import threading
+import math
 
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Twist
 
 startMarker = '<'
 endMarker = '>'
@@ -77,7 +78,7 @@ def waitForArduino():
 
 
 def callback(msg):
- 
+
     x = msg.x
     z = msg.z
     print(x)
@@ -110,9 +111,7 @@ def callback(msg):
 
 def callbackVelocities(vel):
 	global RPS
-	sign_x = vel.linear.x/math.fabs(vel.linear.x)
-	sign_y = vel.linear.y/math.fabs(vel.linear.y)
-	rotation_dir = vel.angular.z/math.fabs(vel.angular.z)
+	global oldRPS
 
 	if (vel.angular.z != 0):
 		wheelBL = vel.angular.z * (+1.0)
@@ -124,16 +123,32 @@ def callbackVelocities(vel):
 		wheelFL = vel.linear.x * (+1.0) + vel.linear.y * (+1.0)
 		wheelFR = vel.linear.x * (-1.0) + vel.linear.y * (+1.0)
 		wheelBR = vel.linear.x * (+1.0) + vel.linear.y * (+1.0)
-
-	RPS = wheelBL + " " + wheelFL + " "+ wheelFR + " " + wheelBR
+	if(wheelBL >= 0):
+		wheelBLstr = "+"+str(wheelBL)
+	else:
+		wheelBLstr = str(wheelBL)
+	if(wheelFL >= 0):
+		wheelFLstr = "+"+str(wheelFL)
+	else:
+		wheelFLstr = str(wheelFL)
+	if(wheelFR >= 0):
+		wheelFRstr = "+"+str(wheelFR)
+	else:
+		wheelFRstr = str(wheelFR)
+	if(wheelBR >= 0):
+		wheelBRstr = "+"+str(wheelBR)
+	else:
+		wheelBRstr = str(wheelBR)
+	RPS = wheelBLstr + " " + wheelFLstr + " "+ wheelFRstr + " " + wheelBRstr
 	print(RPS)
-	sendToArduino(RPS)
-	
+	if(RPS != oldRPS):
+		sendToArduino(RPS)
+		oldRPS = RPS
 
 setupSerial(115200, "/dev/ttyACM0")
 rospy.init_node('compute_vel')
 # subscriber = rospy.Subscriber("/ball_coord", Point, callback)
-subscriber = rospy.Subscriber("/cmd_vel", Point, callbackVelocities)
+subscriber = rospy.Subscriber("/cmd_vel", Twist, callbackVelocities)
    
 rospy.spin()
    
