@@ -67,7 +67,6 @@ public:
      */
     void ballPosCallback(const geometry_msgs::Point &ball_pos)
 	{
-		std::cout <<"qui ci vado"<<std::endl;
 		x_ball = ball_pos.x;
 		y_ball = ball_pos.z;
 
@@ -89,9 +88,10 @@ public:
 					tf::Vector3 ball_football_direction;
 					ball_football_direction = football_goal2ball.getOrigin();
 					
-					tf::Quaternion ball_football_quaternion;
-					ball_football_quaternion = football_goal2ball.getRotation();
-					yaw = asin(2*ball_football_quaternion.x()*ball_football_quaternion.y() + 2*ball_football_quaternion.z()*ball_football_quaternion.w());
+					yaw = atan((ball_football_direction.getX())/(ball_football_direction.getY() - 2.0));
+					//tf::Quaternion ball_football_quaternion;
+					//ball_football_quaternion = football_goal2ball.getRotation();
+					//yaw = asin(2*ball_football_quaternion.x()*ball_football_quaternion.y() + 2*ball_football_quaternion.z()*ball_football_quaternion.w());
 
 				}
 				catch (tf::TransformException &ex){
@@ -126,10 +126,13 @@ nav_msgs::Odometry compute_plan()
 	tf::Vector3 ball_point(x_ball,y_ball,0);
 	tf::Vector3 ball_wrt_world;
 	// ball wrt world frame
-	ball_wrt_world = world2ball * ball_point;
-	int r = 300; // radius from the ball
-	robot_des.pose.pose.position.x = ball_wrt_world.getX() + r*cos(yaw);
-	robot_des.pose.pose.position.y = ball_wrt_world.getY() + r*sin(yaw);	
+	// ball_wrt_world = world2ball * ball_point; // questo vale nella realta quando la posizione della pallina cambia 
+	ball_wrt_world = ball_point;
+	double r = 0.5; // radius from the ball
+	robot_des.pose.pose.position.x = ball_wrt_world.getX() + r*sin(yaw);
+	robot_des.pose.pose.position.y = ball_wrt_world.getY() + r*cos(yaw);
+	std::cout<<"robot des pos x "<<robot_des.pose.pose.position.x<<"\n";
+	std::cout<<"robot des pos y "<<robot_des.pose.pose.position.y <<"\n";
 	robot_des.pose.pose.position.z = 0;
 	tf::Quaternion quat;
 	quat.setRPY(0,0,yaw);

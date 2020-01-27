@@ -77,7 +77,7 @@ int main(int argc, char** argv)
     robot2ball.setRotation(tf::Quaternion(1,0,0,0));
 
 	tf::Transform football_goal2world;
-	football_goal2world.setOrigin(tf::Vector3(0.0, -120.0, 0.0)); //240x360 campo
+	football_goal2world.setOrigin(tf::Vector3(0.0, -2.0, 0.0)); //240x360 campo (0, -120,0)
 	football_goal2world.setRotation(tf::Quaternion(1,0,0,0));
 
 	while(ros::ok()){

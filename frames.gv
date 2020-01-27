@@ -1,0 +1,14 @@
+digraph G {
+"world_frame" -> "robot_frame"[label="Broadcaster: /tf_broadcaster\nAverage rate: 1669.248 Hz\nMost recent transform: 293.148 ( 0.021 sec old)\nBuffer length: 4.390 sec\n"];
+"robot_frame" -> "ball_frame"[label="Broadcaster: /tf_broadcaster\nAverage rate: 1669.248 Hz\nMost recent transform: 293.148 ( 0.021 sec old)\nBuffer length: 4.390 sec\n"];
+"world_frame" -> "football_goal_frame"[label="Broadcaster: /tf_broadcaster\nAverage rate: 1669.248 Hz\nMost recent transform: 293.148 ( 0.021 sec old)\nBuffer length: 4.390 sec\n"];
+"odom" -> "base_link"[label="Broadcaster: /gazebo\nAverage rate: 19.822 Hz\nMost recent transform: 293.147 ( 0.022 sec old)\nBuffer length: 4.389 sec\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 293.169"[ shape=plaintext ] ;
+ }->"world_frame";
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 293.169"[ shape=plaintext ] ;
+ }->"odom";
+}

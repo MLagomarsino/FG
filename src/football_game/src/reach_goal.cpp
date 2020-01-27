@@ -8,7 +8,9 @@
 
 float robot_pos_x;
 float robot_pos_y;
+float robot_pos_z;
 float robot_yaw;
+bool goalReached = false;
 // Publisher of the robot velocity
 ros::Publisher pub_vel;
 
@@ -18,33 +20,73 @@ bool reach_goal(football_game::ReachGoal::Request &req, football_game::ReachGoal
 	double dist_x, dist_y = 0;
 	// Motion along y
 
-	if(abs(robot_pos_x - req.robot_des.pose.pose.position.x) > 50 || abs(robot_pos_y - req.robot_des.pose.pose.position.y) > 50){
+	if(!goalReached && (fabs(robot_pos_x - req.robot_des.pose.pose.position.x) > 0.05 || fabs(robot_pos_y - req.robot_des.pose.pose.position.y) > 0.05)){
+		
 		dist_x = robot_pos_x - req.robot_des.pose.pose.position.x;
 		dist_y = robot_pos_y - req.robot_des.pose.pose.position.y;
+		std::cout<<"robot pos x\n"<<robot_pos_x<<"\n";
+		std::cout<<"robot pos y\n"<<robot_pos_y<<"\n";
+		std::cout<<"robot pos z\n"<<robot_pos_z<<"\n";		
 		// inf and sup limits to limit robot velocity
-		if (abs(dist_x) > 50)
+		if (fabs(dist_x) > 0.05){
+			std::cout<<"heila sono la x\n"<<dist_x<<"\n";
 			vel.linear.x = -0.5*(dist_x); 
 			if(vel.linear.x>1)
 				vel.linear.x=1;
 			else if (vel.linear.x<-1)
 				vel.linear.x=-1;
-		else
+		}
+		else{	
+			std::cout<<"heila sono la x a zero\n"<<dist_x<<"\n";
 			vel.linear.x = 0;
-		if (abs(dist_y) > 50)
+		}
+
+		if (fabs(dist_y) > 0.05){
+			std::cout<<"heila sono la y\n"<<dist_y<<"\n";
 			vel.linear.y = -0.5*(dist_y);
 			if(vel.linear.y>1)
 				vel.linear.y=1;
 			else if (vel.linear.y<-1)
 				vel.linear.y=-1;
-		else
+		}
+		else{
+			std::cout<<"heila sono la y a zero\n"<<dist_y<<"\n";
 			vel.linear.y =0;
+		}
 	}
+	std::cout<<"robot yaw \n"<<robot_yaw<<"\n";
+	
+	if(vel.linear.x == 0 && vel.linear.y == 0){
+		geometry_msgs::Quaternion quat = req.robot_des.pose.pose.orientation;
+		float robot_des_yaw = asin(2*quat.x*quat.y + 2*quat.z*quat.w);
+		std::cout<<"robot des yaw \n"<<robot_des_yaw<<"\n";
+		if(fabs(robot_yaw - robot_des_yaw) > 0.01)
+			vel.angular.z = -1*(robot_yaw - robot_des_yaw);
+		else{
+			vel.angular.z = 0;
+			goalReached = true;
+		}
+	}
+	
+	if(goalReached)
+		vel.linear.y = -1;
+	
 	// Goal reached 
-	std::cout << vel.linear.x;
-	std::cout << vel.linear.y;
+	std::cout << "linear vel x "<<vel.linear.x<<"\n";
+	std::cout << "linear vel y "<<vel.linear.y<<"\n";
+	std::cout << "angular vel z "<<vel.angular.z<<"\n";
 	
 	// Publish the velocity
-	pub_vel.publish(vel);     
+	pub_vel.publish(vel);   
+	
+	if(goalReached){
+		std::cout << "Goal reached\n";
+		vel.linear.y = 0;
+		sleep(2);  
+		pub_vel.publish(vel);
+		goalReached = false;
+		sleep(2); 
+	} 
 	res.ack = true;	
 	return true;
 }
@@ -61,7 +103,8 @@ void odomCallback(const nav_msgs::Odometry& msg)
 	
 	// Motion along x
 	robot_pos_x = msg.pose.pose.position.x;
-	robot_pos_y = msg.pose.pose.position.z;
+	robot_pos_y = msg.pose.pose.position.y;
+	robot_pos_z = msg.pose.pose.position.z;
 	geometry_msgs::Quaternion quat = msg.pose.pose.orientation;
 	robot_yaw = asin(2*quat.x*quat.y + 2*quat.z*quat.w);
 	

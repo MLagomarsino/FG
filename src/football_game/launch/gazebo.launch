@@ -23,6 +23,6 @@
 
     <node name="service" pkg="football_game" type="reach_goal" output="screen" />
 
-    <!-- Launch compute_goal node -->
+    <!-- Launch tf_broadcaster node -->
     <node name="tf_broadcaster" pkg="football_game" type="tf_broadcaster" output="screen" cwd="node"/>
 </launch>
