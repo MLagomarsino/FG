@@ -108,17 +108,17 @@ def callback(msg):
                 sendToArduino(newRPS)
                 oldRPS = newRPS
 
-def callbackVelocities(vel)
+def callbackVelocities(vel):
 	global RPS
 	sign_x = vel.linear.x/math.fabs(vel.linear.x)
 	sign_y = vel.linear.y/math.fabs(vel.linear.y)
 	rotation_dir = vel.angular.z/math.fabs(vel.angular.z)
 
 	if (vel.angular.z != 0):
-		wheelBL = vel.angular.z * (-1.0)
-		wheelFL = vel.angular.z * (-1.0)
-		wheelFR = vel.angular.z * (+1.0)
-		wheelBR = vel.angular.z * (+1.0)
+		wheelBL = vel.angular.z * (+1.0)
+		wheelFL = vel.angular.z * (+1.0)
+		wheelFR = vel.angular.z * (-1.0)
+		wheelBR = vel.angular.z * (-1.0)
 	else:
 		wheelBL = vel.linear.x * (-1.0) + vel.linear.y * (+1.0)
 		wheelFL = vel.linear.x * (+1.0) + vel.linear.y * (+1.0)
