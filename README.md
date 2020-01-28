@@ -2,14 +2,14 @@
 ## Experimental Robotics Laboratory - Lab. 2
 
 The goal of this second lab is to implement an algorithm to make a robot able to detect a ball and kick it inside the football goal.
-The ball is of a given color and it is recognized through a monocular camera (calibrated) mounted on the robot. 
-The files for the camera calibration have been added in the apposite folders of the Raspberry.
-The calibration has been done for two resolutions: 640x480 and 320x200.
-The dimensions of the football field are given, and the position of the football goal is fixed.
-The position of the robot wrt the world is known, thanks to markers placed in the environment.
-Thanks to these informations it possible to compute a desired position and orientation for the robot to properly being able to 
-kick the ball inside the football goal.
-The robot is omnidirectional.
+The ball is of a given color so that it can be recognized through a previously calibrated monocular camera, mounted on the robot. 
+The files for the camera calibration have been added in the apposite folders of the Raspberry, so that they are automatically retrieved when the camera node is launched. The calibration has been performed for two resolutions: 640x480 and 320x200.
+
+The dimensions of the football field are given, thus the position of the football goal is known.
+The position of the robot wrt the world is always available thanks to markers placed in the environment.
+These informations allow to compute the robot's desired position and orientation to properly being able to 
+score a gol.
+The robot used is omnidirectional.
 
 
 ## Authors
@@ -20,7 +20,7 @@ The robot is omnidirectional.
 | Marta Lagomarsino | marta.lago@hotmail.it | 4213518 |
 
 ## How to run the project
-To simulate the behaviour of the robot, launch the simulation on Gazebo writing the following command:
+The behaviour of the robot can be simulated by launching the simulation on Gazebo:
 ```
 roslaunch football_game gazebo.launch <arguments>
 ```
@@ -37,29 +37,34 @@ rostopic pub -r 1 geometry_msgs/Point '5.0' '0.0' '6.0'
 Once Gazebo is open, press play to start the simulation: the robot will reach a goal position and orientation
 which allows it to kick the ball inside the football goal.
 
-To run the code on the real robot:
-Open a terminal and connect via ssh to the Raspberry, and launch the raspicam node by typing:
-```
-roslaunch raspicam_node camerav2_320x200_30fps.launch enable_raw:=true
-```
-In another terminal, go inside the project folder and run:
-```
-python ball_tracking.py
-```
-In another terminal, go inside the project folder and run:
-```
-python compute_vel.py
-```
 
-In a terminal on your computer, launch the roscore by typing:
+To perform the task with the real robot, open a terminal and connect via ssh to the Raspberry.
+
+In a terminal on your computer, launch roscore by typing:
 ```
 roscore &
 ```
-On the same terminal, publish the velocities of the robot:
+In the same terminal, publish the velocities of the robot:
 ```
 rostopic pub -r 1 geometry_msgs/Twist -- '[1.0, 0.0, 0.0]' '[0.0, 0.0, 0.0]'
 ```
 
+On the Rasberry, go inside the project folder and run the compute_vel script:
+```
+python compute_vel.py
+```
+This script will compute the velocities that should be given to the wheels, on the basis of the linear and angular velocities published on the /cmd_vel topic.
+
+
+
+In order to perform the ball tracking and publish the position of the ball wrt the robot on the topic /ball_coord, launch the raspicam node on the Raspberry by typing:
+```
+roslaunch raspicam_node camerav2_320x200_30fps.launch enable_raw:=true
+```
+Eventually, in another terminal, go inside the project folder and run:
+```
+python ball_tracking.py
+```
 
 ## Doxygen documentation 
 To compile the code documentation, it is required to run the following command in the workspace:
