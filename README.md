@@ -19,7 +19,8 @@ The robot used is omnidirectional.
 | Lucrezia Grassi | lucre.grassi@gmail.com | 4223595 |
 | Marta Lagomarsino | marta.lago@hotmail.it | 4213518 |
 
-## How to run the simulation
+## How to run the code
+### Simulation
 The behaviour of the robot can be simulated by launching the simulation on Gazebo:
 ```
 roslaunch football_game gazebo.launch <arguments>
@@ -37,7 +38,7 @@ rostopic pub -r 1 geometry_msgs/Point '5.0' '0.0' '6.0'
 Once Gazebo is open, press play to start the simulation: the robot will reach a goal position and orientation
 which allows it to kick the ball inside the football goal.
 
-# On the real robot
+### Map the velocities on the real robot
 To perform the task with the real robot, open a terminal and connect via ssh to the Raspberry.
 
 In a terminal on your computer, launch roscore by typing:
@@ -48,7 +49,6 @@ In the same terminal, publish the velocities of the robot:
 ```
 rostopic pub -r 1 geometry_msgs/Twist -- '[1.0, 0.0, 0.0]' '[0.0, 0.0, 0.0]'
 ```
-
 On the Rasberry, go inside the project folder and run the compute_vel script:
 ```
 python compute_vel.py
@@ -56,7 +56,7 @@ python compute_vel.py
 This script will compute the velocities that should be given to the wheels, on the basis of the linear and angular velocities published on the /cmd_vel topic.
 
 
-
+### Perform ball tracking
 In order to perform the ball tracking and publish the position of the ball wrt the robot on the topic /ball_coord, launch the raspicam node on the Raspberry by typing:
 ```
 roslaunch raspicam_node camerav2_320x200_30fps.launch enable_raw:=true
