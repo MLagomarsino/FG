@@ -19,7 +19,7 @@ The robot used is omnidirectional.
 | Lucrezia Grassi | lucre.grassi@gmail.com | 4223595 |
 | Marta Lagomarsino | marta.lago@hotmail.it | 4213518 |
 
-## How to run the project
+## How to run the simulation
 The behaviour of the robot can be simulated by launching the simulation on Gazebo:
 ```
 roslaunch football_game gazebo.launch <arguments>
@@ -37,7 +37,7 @@ rostopic pub -r 1 geometry_msgs/Point '5.0' '0.0' '6.0'
 Once Gazebo is open, press play to start the simulation: the robot will reach a goal position and orientation
 which allows it to kick the ball inside the football goal.
 
-
+# On the real robot
 To perform the task with the real robot, open a terminal and connect via ssh to the Raspberry.
 
 In a terminal on your computer, launch roscore by typing:
