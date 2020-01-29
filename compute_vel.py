@@ -7,6 +7,7 @@ import threading
 import math
 
 from geometry_msgs.msg import Twist
+## @file
 
 startMarker = '<'
 endMarker = '>'
@@ -78,17 +79,22 @@ def waitForArduino():
         if not (msg == 'XXX'):
             print(msg)
 
-
+## Callback associated to topic /cmd_vel
+#
+# The function sends to Arduino the desired velocities of each wheel according to the Twist read by /cmd_vel
+# @param[in] 	vel		desired velocity for the robot
 def callbackVelocities(vel):
 	global RPS
 	global oldRPS
 
 	if (vel.angular.z != 0):
+		# clockwise/counterclockwise rotation
 		wheelBL = vel.angular.z * (+1.0)
 		wheelFL = vel.angular.z * (+1.0)
 		wheelFR = vel.angular.z * (-1.0)
 		wheelBR = vel.angular.z * (-1.0)
 	else:
+		# traslation to the right and forward
 		wheelBL = vel.linear.x * (-1.0) + vel.linear.y * (+1.0)
 		wheelFL = vel.linear.x * (+1.0) + vel.linear.y * (+1.0)
 		wheelFR = vel.linear.x * (-1.0) + vel.linear.y * (+1.0)
@@ -112,11 +118,12 @@ def callbackVelocities(vel):
 	else:
 		wheelBRstr = str(wheelBR)
 
+	# string specifing velocities of all wheels
 	RPS = wheelBLstr + " " + wheelFLstr + " "+ wheelFRstr + " " + wheelBRstr
 	print(RPS)
 
 	if(RPS != oldRPS):
-        # send the velocities to the arduino only if different from the previous ones
+        # send the velocities to Arduino only if different from the previous ones
 		sendToArduino(RPS)
 		oldRPS = RPS
 

@@ -19,8 +19,7 @@
 
 using namespace std;
 
-
-/*@file */
+/** @file */
 ros::Publisher pub_goal; /*!< Publisher of the goal of the robot on /goal*/
 ros::Subscriber odom_sub; /*!< Subscriber to /odom*/
 nav_msgs::Odometry robot_des; /*!< Odometry message describing the desired position of robot*/
@@ -32,11 +31,17 @@ float y_ball; /**< y coordinate of the ball */
 
 float x_robot; /**< x coordinate of the robot */
 float y_robot; /**< y coordinate of the robot */
-geometry_msgs::Quaternion orientation_robot;
-float yaw;
+geometry_msgs::Quaternion orientation_robot; /**< orientation of the robot */
+float yaw;  /**< yaw angle between the ball and the football goal */
 
 tf::Transform world2ball; /**< computed transform between the ball and the world */
 
+/** @brief Class to implement Ball tracking
+ * 
+ *  The class computes :
+ *	*	position of the ball with respect to the world frame;
+ *	*	yaw angle between football goal and the ball, usefull to kick the ball.
+ */
 class BallPositionWorld {
 public:
     /**

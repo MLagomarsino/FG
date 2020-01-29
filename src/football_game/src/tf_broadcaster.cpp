@@ -5,8 +5,7 @@
 #include <tf/transform_datatypes.h>
 #include <math.h>
 
-
-/*@file */
+/** @file */
 double x_robot; /*!< x coordinate of the robot */
 double y_robot; /*!< y coordinate of the robot */
 geometry_msgs::Quaternion orientation_robot; /*!< quaternion containing the orientation of the robot */

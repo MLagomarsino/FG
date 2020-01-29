@@ -20,11 +20,22 @@ import rospy
 # Ros Messages
 from sensor_msgs.msg import CompressedImage
 from geometry_msgs.msg import Point
-
+## @file
 VERBOSE = False
 
+## Class to acquire image from the camera
+#
+# The class performs:
+# 	* object segmentation based on color to detect the ball;
+#	* tracking of ball centroid;
+#	* publish current coordinates of the ball centroid on /ball_coord
 class image_feature:
 
+	## Init
+	#
+	# * publish the coordinates of the ball wrt to the robot frame on /ball_coord
+	# * publish the compressed image from the camera on /output/image_raw/compressed
+	# * subscribe to /raspicam_node/image/compressed to acquire the compressed image of the camera
     def __init__(self):
 		# topic where we publish the coordinates of the ball wrt to the robot frame
 		self.ball_coord = rospy.Publisher("/ball_coord", Point, queue_size = 1)
@@ -36,10 +47,11 @@ class image_feature:
 		if VERBOSE :
 			print "subscribed to /raspicam_node/image/compressed"
 
-
+	## Callback function of subscribed topic /raspicam_node/image/compressed
+	#
+    # Here images get converted and features detected.
     def callback(self, ros_data):
-        '''Callback function of subscribed topic. 
-        Here images get converted and features detected'''
+        
         if VERBOSE :
             print('received image of type: "%s"' % ros_data.format)
 
@@ -109,9 +121,10 @@ class image_feature:
 
 			# function to obtain the 3D coordinates of the ball centroid
 			retval, rvec, tvec = cv2.solvePnP(objectPoints, imagePoints, np.asarray(camera_matrix), np.asarray(distortion_coeff), False, cv2.SOLVEPNP_EPNP)
-			if(tvec.all() is not None):
+			if(tvec.all() is not None): # Output translation vector of centroid wrt camera
 				print(tvec)
 				ball_centroid  = Point(x = tvec[0], y = tvec[1], z = tvec[2])
+				# publish ball coordinates on /ball_coord
 				self.ball_coord.publish(ball_centroid)
 			
 			print(tvec)

@@ -6,7 +6,7 @@
 #include "geometry_msgs/Twist.h" // to publish the velocity
 
 
-/*@file */
+/** @file */
 float robot_pos_x; /*!< x coordinate of the robot */
 float robot_pos_y; /*!< y coordinate of the robot */
 float robot_pos_z; /*!< z coordinate of the robot */
