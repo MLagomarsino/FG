@@ -87,14 +87,18 @@ public:
 					listener.waitForTransform("robot_frame", "ball_frame", ros::Time(0), ros::Duration(10.0) );
 					listener.lookupTransform("robot_frame", "ball_frame",  ros::Time(0), t_robot2ball);
 					tf::Transform robot2ball(t_robot2ball.getBasis(), t_robot2ball.getOrigin());
-					world2ball = t_world2robot * robot2ball;
-
+					//world2ball = t_world2robot * robot2ball;
+					world2ball = robot2ball;
+					
 					tf::Transform football_goal2ball = t_football_goal2world * world2ball;
 					tf::Vector3 ball_football_direction;
 					ball_football_direction = football_goal2ball.getOrigin();
-
+					
 					// compute yaw angle between football goal and the ball, usefull to kick the ball
-					yaw = atan((ball_football_direction.getX())/(ball_football_direction.getY() - 2.0));
+					yaw = atan((ball_football_direction.getY())/(ball_football_direction.getX()));
+					std::cout<<"\nx_ball: "<<ball_football_direction.getX();
+					std::cout<<"\ny_ball: "<<ball_football_direction.getY();
+					
 				}
 				catch (tf::TransformException &ex){
 					ROS_WARN("World to robot transform unavailable %s", ex.what());
@@ -129,16 +133,17 @@ nav_msgs::Odometry compute_plan()
 	// ball_wrt_world = t_world2robot * ball_point; // ONLY WHEN USING THE REAL ROBOT (the position of the ball is published wrt robot frame) 
 	ball_wrt_world = ball_point; // ONLY WHEN position of the ball is published from terminal (wrt world frame) 
 
-	double r = 0.5; // radius from the ball
+	double r = 1; // radius from the ball
 	// desired position of the robot
-	robot_des.pose.pose.position.x = ball_wrt_world.getX() + r*sin(yaw);
-	robot_des.pose.pose.position.y = ball_wrt_world.getY() + r*cos(yaw);
+	robot_des.pose.pose.position.x = ball_wrt_world.getX() + r*cos(yaw);
+	robot_des.pose.pose.position.y = ball_wrt_world.getY() + r*sin(yaw);
 	robot_des.pose.pose.position.z = 0;
 	// std::cout<<"robot des pos x "<<robot_des.pose.pose.position.x<<"\n";
 	// std::cout<<"robot des pos y "<<robot_des.pose.pose.position.y <<"\n";
 
 	tf::Quaternion quat;
-	quat.setRPY(0,0,yaw);
+	quat.setRPY(0,0,- yaw - 1.570796);
+	std::cout<<"\ndesired orientation "<<(-yaw-1.570796);
 	// desired orientation of the robot
 	robot_des.pose.pose.orientation.x = quat.x();
 	robot_des.pose.pose.orientation.y = quat.y();

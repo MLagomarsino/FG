@@ -101,7 +101,7 @@ def callbackVelocities(vel):
 		wheelBR = vel.linear.x * (+1.0) + vel.linear.y * (+1.0)
 	
     # check the signs of the velocities, so that when it is positive, add the +
-    if(wheelBL >= 0):
+	if(wheelBL >= 0):
 		wheelBLstr = "+" + str(wheelBL)
 	else:
 		wheelBLstr = str(wheelBL)

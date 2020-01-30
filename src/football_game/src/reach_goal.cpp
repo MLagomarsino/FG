@@ -7,9 +7,9 @@
 
 
 /** @file */
-float robot_pos_x; /*!< x coordinate of the robot */
-float robot_pos_y; /*!< y coordinate of the robot */
-float robot_yaw; /*!< yaw angle of the robot */
+double robot_pos_x; /*!< x coordinate of the robot */
+double robot_pos_y; /*!< y coordinate of the robot */
+double robot_yaw; /*!< yaw angle of the robot */
 
 bool goalReached = false; /*!< goalReached flag to check if the goal has been reached */
 ros::Publisher pub_vel; /*!< publisher of the robot velocity */
@@ -62,7 +62,8 @@ bool reach_goal(football_game::ReachGoal::Request &req, football_game::ReachGoal
 	// if the linear velocities are 0 (goal position reached), start rotating
 	if(vel.linear.x == 0 && vel.linear.y == 0){
 		geometry_msgs::Quaternion quat = req.robot_des.pose.pose.orientation;
-		float robot_des_yaw = asin(2*quat.x*quat.y + 2*quat.z*quat.w);
+		double robot_des_yaw = asin(2*quat.x*quat.y + 2*quat.z*quat.w);
+		std::cout<<"\n--- desired yaw"<<robot_yaw;
 		// std::cout<<"robot des yaw \n"<<robot_des_yaw<<"\n";
 
 		// angular velocity along z
@@ -110,6 +111,7 @@ void odomCallback(const nav_msgs::Odometry& msg)
 	robot_pos_y = msg.pose.pose.position.y;
 	geometry_msgs::Quaternion quat = msg.pose.pose.orientation;
 	robot_yaw = asin(2*quat.x*quat.y + 2*quat.z*quat.w);
+	std::cout<<"\n--- current yaw"<<robot_yaw;
 }
 
 
