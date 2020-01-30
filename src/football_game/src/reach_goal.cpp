@@ -9,7 +9,6 @@
 /** @file */
 float robot_pos_x; /*!< x coordinate of the robot */
 float robot_pos_y; /*!< y coordinate of the robot */
-float robot_pos_z; /*!< z coordinate of the robot */
 float robot_yaw; /*!< yaw angle of the robot */
 
 bool goalReached = false; /*!< goalReached flag to check if the goal has been reached */
@@ -17,7 +16,8 @@ ros::Publisher pub_vel; /*!< publisher of the robot velocity */
 
 /** Service function
 	 * @param[in]  req		odometry message, namely current position of robot 
-	 * @param[in]  res 		boolean which tells if the goal has been reached */
+	 * @param[in]  res 		boolean which tells if the goal has been reached 
+*/
 bool reach_goal(football_game::ReachGoal::Request &req, football_game::ReachGoal::Response &res)
 {
 	geometry_msgs::Twist vel;
@@ -30,10 +30,9 @@ bool reach_goal(football_game::ReachGoal::Request &req, football_game::ReachGoal
 		dist_x = robot_pos_x - req.robot_des.pose.pose.position.x;
 		dist_y = robot_pos_y - req.robot_des.pose.pose.position.y;
 		// std::cout<<"robot pos x\n"<<robot_pos_x<<"\n";
-		// std::cout<<"robot pos y\n"<<robot_pos_y<<"\n";
-		// std::cout<<"robot pos z\n"<<robot_pos_z<<"\n";		
+		// std::cout<<"robot pos y\n"<<robot_pos_y<<"\n";		
 		
-		// linear velocity along x
+		// linear velocity along x (bounded [-1,+1])
 		if (fabs(dist_x) > 0.05){
 			vel.linear.x = -0.5*(dist_x); 
 			if(vel.linear.x > 1)
@@ -45,7 +44,7 @@ bool reach_goal(football_game::ReachGoal::Request &req, football_game::ReachGoal
 			vel.linear.x = 0;
 		}
 
-		// linear velocity along y
+		// linear velocity along y (bounded [-1,+1])
 		if (fabs(dist_y) > 0.05){
 			vel.linear.y = -0.5*(dist_y);
 			if(vel.linear.y > 1)
@@ -102,15 +101,13 @@ bool reach_goal(football_game::ReachGoal::Request &req, football_game::ReachGoal
 /** Callback associated to topic /odom 
  *
  * The function saves the current position and yaw of the robot in global variables
- * @param[in]  msg		odometry message  current position of the robot*/
+ * @param[in]  msg		odometry message  current position of the robot wrt world frame */
 void odomCallback(const nav_msgs::Odometry& msg)
 {
 	geometry_msgs::Twist vel;
 	
-	// Motion along x
 	robot_pos_x = msg.pose.pose.position.x;
 	robot_pos_y = msg.pose.pose.position.y;
-	robot_pos_z = msg.pose.pose.position.z;
 	geometry_msgs::Quaternion quat = msg.pose.pose.orientation;
 	robot_yaw = asin(2*quat.x*quat.y + 2*quat.z*quat.w);
 }

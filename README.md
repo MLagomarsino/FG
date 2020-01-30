@@ -33,7 +33,7 @@ roslaunch football_game gazebo.launch r_x:=0 r_y:=0
 ```
 In order to publish the position of the ball, open a new terminal and type:
 ```
-rostopic pub -r 1 geometry_msgs/Point '5.0' '0.0' '6.0'
+rostopic pub -r 1 /ball_coord geometry_msgs/Point '5.0' '0.0' '6.0'
 ```
 Once Gazebo is open, press play to start the simulation: the robot will reach a goal position and orientation
 which allows it to kick the ball inside the football goal.
@@ -47,7 +47,7 @@ roscore &
 ```
 In the same terminal, publish the velocities of the robot:
 ```
-rostopic pub -r 1 geometry_msgs/Twist -- '[1.0, 0.0, 0.0]' '[0.0, 0.0, 0.0]'
+rostopic pub -r 1 /cmd_vel geometry_msgs/Twist -- '[1.0, 0.0, 0.0]' '[0.0, 0.0, 0.0]'
 ```
 On the Rasberry, go inside the project folder and run the compute_vel script:
 ```

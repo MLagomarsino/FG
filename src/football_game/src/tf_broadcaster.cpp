@@ -10,8 +10,8 @@ double x_robot; /*!< x coordinate of the robot */
 double y_robot; /*!< y coordinate of the robot */
 geometry_msgs::Quaternion orientation_robot; /*!< quaternion containing the orientation of the robot */
 
-double x_ball; /*!< x coordinate of the ball wrt the robot (if using the real robot with the camera), otherwise wrt the world (if published on the terminal) */
-double y_ball; /*!< y coordinate of the ball wrt the robot (if using the real robot with the camera), otherwise wrt the world (if published on the terminal) */
+double x_ball; /*!< x coordinate of the ball wrt the robot */
+double y_ball; /*!< y coordinate of the ball wrt the robot */
 
 /** @brief Class to publish periodically the transformation between the ball frame and the world frame
  */
@@ -29,7 +29,7 @@ class TF_Broadcaster{
     /**
      * Position callback function
      * acquires the current position of the ball
-     * @param[in]  ball_pos 	current position of the ball
+     * @param[in]  ball_pos 	current position of the ball wrt the robot
      */
     void ball_posCB(const geometry_msgs::Point& ball_pos){
     	x_ball = ball_pos.x;
@@ -39,7 +39,7 @@ class TF_Broadcaster{
     /**
      * Position callback function
      * acquires the current position of the robot
-     * @param[in]  robot_pos	current position of the robot
+     * @param[in]  robot_pos	current position of the robot wrt the world frame
      */
     void odomCB(const nav_msgs::Odometry& robot_pos){
     	x_robot = robot_pos.pose.pose.position.x;
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 		world2robot.setOrigin(tf::Vector3(x_robot, y_robot, 0.0));
 		world2robot.setRotation(tf::Quaternion(orientation_robot.x, orientation_robot.y, orientation_robot.z, orientation_robot.w));
 
-		// set origin of ball frame wrt robot frame on the basis of real time position of the ball (acquired by the camera or published on the terminal)
+		// set origin of ball frame wrt robot frame on the basis of real time position of the ball (acquired by the camera)
 		robot2ball.setOrigin(tf::Vector3(x_ball, y_ball, 0.0));
 		
 		// stamp the transforms in the tree frame

@@ -20,21 +20,19 @@
 using namespace std;
 
 /** @file */
-ros::Publisher pub_goal; /*!< Publisher of the goal of the robot on /goal*/
-ros::Subscriber odom_sub; /*!< Subscriber to /odom*/
-nav_msgs::Odometry robot_des; /*!< Odometry message describing the desired position of robot*/
+ros::Publisher pub_goal;		/*!< Publisher of the goal of the robot on /goal*/
+ros::Subscriber odom_sub;		/*!< Subscriber to /odom*/
+nav_msgs::Odometry robot_des;	/*!< Odometry message describing the desired position of robot*/
 
-geometry_msgs::Vector3 ball_football_direction; /**< direction between ball and football goal */
+float x_ball; /*!< x coordinate of the ball */
+float y_ball; /*!< y coordinate of the ball */
 
-float x_ball; /**< x coordinate of the ball */
-float y_ball; /**< y coordinate of the ball */
+float x_robot; /*!< x coordinate of the robot wrt the world frame */
+float y_robot; /*!< y coordinate of the robot  wrt the world frame */
+geometry_msgs::Quaternion orientation_robot; /*!< orientation of the robot wrt the world frame */
+float yaw;  /*!< yaw angle between the ball and the football goal */
 
-float x_robot; /**< x coordinate of the robot */
-float y_robot; /**< y coordinate of the robot */
-geometry_msgs::Quaternion orientation_robot; /**< orientation of the robot */
-float yaw;  /**< yaw angle between the ball and the football goal */
-
-tf::Transform world2ball; /**< computed transform between the ball and the world */
+tf::Transform world2ball; /*!< computed transform between ball and world frames*/
 
 /** @brief Class to implement Ball tracking
  * 
@@ -51,7 +49,7 @@ public:
      
     /** Handler:
      * - subscribe to /ball_coord to read the position of the ball
-     * - subscribe to /odom topic to read robot odometry
+     * - subscribe to /odom topic to read robot odometry wrt the world frame
      */
     BallPositionWorld()
     {
@@ -60,12 +58,13 @@ public:
     }
 
 	/** Callback associated to topic /odom
-	 * @param[in]  msg		odometry message, namely current position of robot */
+	 * @param[in]  msg		odometry message, namely current position of robot wrt the world frame
+	 */
 	void odomCallback(const nav_msgs::Odometry& msg)
 	{
 		x_robot = msg.pose.pose.position.x; /**< x coordinate of the robot */
 		y_robot = msg.pose.pose.position.y; /**< y coordinate of the robot */
-		orientation_robot = msg.pose.pose.orientation; /**< Orientation of the robot wrt the world frame*/
+		orientation_robot = msg.pose.pose.orientation; /**< orientation of the robot*/
 	}
     /** 
      * Callback function
@@ -119,8 +118,7 @@ protected:
     ros::Subscriber ball_pos_sub; /**< Subscriber to /ball_coord */
 };
 
-/** The function:
- * - acquires the initial position of the robot (robot_des of the previous loop)
+/** The function computes the desired position and orientation of the robot to kick the ball.
  * @param[out]  robot_des	odometry message specifing the desired robot position
  */
 nav_msgs::Odometry compute_plan()
@@ -128,10 +126,11 @@ nav_msgs::Odometry compute_plan()
 	tf::Vector3 ball_point(x_ball, y_ball, 0);
 	tf::Vector3 ball_wrt_world;
 	// ball wrt world frame
-	// ball_wrt_world = world2ball * ball_point; // ONLY WHEN USING THE REAL ROBOT (the position of the ball is published wrt robot frame) 
-	ball_wrt_world = ball_point;
+	// ball_wrt_world = t_world2robot * ball_point; // ONLY WHEN USING THE REAL ROBOT (the position of the ball is published wrt robot frame) 
+	ball_wrt_world = ball_point; // ONLY WHEN position of the ball is published from terminal (wrt world frame) 
 
 	double r = 0.5; // radius from the ball
+	// desired position of the robot
 	robot_des.pose.pose.position.x = ball_wrt_world.getX() + r*sin(yaw);
 	robot_des.pose.pose.position.y = ball_wrt_world.getY() + r*cos(yaw);
 	robot_des.pose.pose.position.z = 0;
@@ -140,6 +139,7 @@ nav_msgs::Odometry compute_plan()
 
 	tf::Quaternion quat;
 	quat.setRPY(0,0,yaw);
+	// desired orientation of the robot
 	robot_des.pose.pose.orientation.x = quat.x();
 	robot_des.pose.pose.orientation.y = quat.y();
 	robot_des.pose.pose.orientation.z = quat.z();
@@ -152,7 +152,7 @@ nav_msgs::Odometry compute_plan()
  * Main function:
  *
  * - definition of the publisher of the /goal topic where the goal position of the robot is published
- * - declare and call the reach_goal service 
+ * - declare and call the reach_goal service to move toward the desired position and orientation
  * @param[in]  r_x			x coordinate of the robot
  * @param[in]  r_y			y coordinate of the robot
  */
