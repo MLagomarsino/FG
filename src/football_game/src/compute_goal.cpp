@@ -1,6 +1,7 @@
 #include "ros/ros.h"
 #include "nav_msgs/Odometry.h" // used for the robot goal position
 #include "std_msgs/Bool.h" // for the ack message
+#define _USE_MATH_DEFINES
 
 #include <string>
 #include <fstream>
@@ -142,7 +143,12 @@ nav_msgs::Odometry compute_plan()
 	// std::cout<<"robot des pos y "<<robot_des.pose.pose.position.y <<"\n";
 
 	tf::Quaternion quat;
-	quat.setRPY(0, 0, -yaw-1.570796);
+	double fb_y_pos = 5.0;
+	if(robot_des.pose.pose.position.y >= fb_y_pos)
+		quat.setRPY(0, 0, -yaw- M_PI/2);
+	else
+		quat.setRPY(0, 0, -yaw+M_PI);
+
 	std::cout<<"\ndesired orientation "<<(-yaw-1.570796);
 	// desired orientation of the robot
 	robot_des.pose.pose.orientation.x = quat.x();
