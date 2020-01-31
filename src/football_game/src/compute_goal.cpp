@@ -32,13 +32,13 @@ float y_robot; /*!< y coordinate of the robot  wrt the world frame */
 geometry_msgs::Quaternion orientation_robot; /*!< orientation of the robot wrt the world frame */
 float yaw;  /*!< yaw angle between the ball and the football goal */
 
-tf::Transform world2ball; /*!< computed transform between ball and world frames*/
+tf::Transform world2ball; /*!< computed transform between ball and world frame*/
 
-/** @brief Class to implement Ball tracking
+/** @brief Class to implement ball tracking
  * 
  *  The class computes :
- *	*	position of the ball with respect to the world frame;
- *	*	yaw angle between football goal and the ball, usefull to kick the ball.
+ *	*	position of the ball wrt the world frame;
+ *	*	yaw angle between football goal and the ball, useful to kick the ball.
  */
 class BallPositionWorld {
 public:
@@ -142,7 +142,7 @@ nav_msgs::Odometry compute_plan()
 	// std::cout<<"robot des pos y "<<robot_des.pose.pose.position.y <<"\n";
 
 	tf::Quaternion quat;
-	quat.setRPY(0,0,- yaw - 1.570796);
+	quat.setRPY(0, 0, -yaw-1.570796);
 	std::cout<<"\ndesired orientation "<<(-yaw-1.570796);
 	// desired orientation of the robot
 	robot_des.pose.pose.orientation.x = quat.x();
@@ -186,8 +186,10 @@ int main(int argc, char ** argv)
 	while(ros::ok()){
 		// if the ball has been detected, compute desired position and call the service
 		if (x_ball != 0 && y_ball != 0){
+			// call the compute goal function which returns the desired position of the robot
 			robot_des = compute_plan();
 			football_game::ReachGoal srv;
+			// the request to the service is the desired position
 			srv.request.robot_des = robot_des;
 			result = client_reach_goal.call(srv);
 		}

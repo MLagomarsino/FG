@@ -77,11 +77,11 @@ int main(int argc, char** argv)
 	
 	tf::Transform robot2ball;
 	robot2ball.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
-    robot2ball.setRotation(tf::Quaternion(0,0,0,1));
+    robot2ball.setRotation(tf::Quaternion(0, 0, 0, 1));
 
 	tf::Transform football_goal2world;
-	football_goal2world.setOrigin(tf::Vector3(0.0, 2.0, 0.0)); //240x360 -> in real world (0, -120, 0)
-	football_goal2world.setRotation(tf::Quaternion(0,0,0,1));
+	football_goal2world.setOrigin(tf::Vector3(0.0, 2.0, 0.0)); //240x360 -> in real world (0, 120, 0)
+	football_goal2world.setRotation(tf::Quaternion(0, 0, 0, 1));
 
 	while(ros::ok()){
 		
