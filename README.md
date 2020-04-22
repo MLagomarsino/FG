@@ -11,13 +11,10 @@ These informations allow to compute the robot's desired position and orientation
 score a gol.
 The robot used is omnidirectional.
 
-
-## Authors
-| Name | E-mail | ID |
-|------|--------|--------|
-| Luna Gava| lunagava@me.com | 4206721 |
-| Lucrezia Grassi | lucre.grassi@gmail.com | 4223595 |
-| Marta Lagomarsino | marta.lago@hotmail.it | 4213518 |
+## Software Architecture
+<p align="center"> 
+<img src="SoftwareArchitecture.jpg">
+</p>
 
 ## How to run the code
 ### Simulation
@@ -72,3 +69,10 @@ To compile the code documentation, it is required to run the following command i
 doxygen Lab2_documentation
 ``` 
 Enter the newly generated folder */doxygen_documentation/html* and open *index.html*.
+
+## Authors
+| Name | E-mail | ID |
+|------|--------|--------|
+| Luna Gava| lunagava@me.com | 4206721 |
+| Lucrezia Grassi | lucre.grassi@gmail.com | 4223595 |
+| Marta Lagomarsino | marta.lago@hotmail.it | 4213518 |
