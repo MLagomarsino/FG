@@ -133,3 +133,7 @@ dmypy.json
 *~
 *.catkin_workspace
 doxygen_documentation/
+
+# Mac
+.DS_Store
+*/.DS_Store
